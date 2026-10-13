@@ -108,8 +108,8 @@ const GRID_BG = {
 export default function AboutPage() {
   return (
     <>
-      {/* ═══ ENERBLOCK-STYLE ARCHITECTURAL HERO ═══ */}
-      <section className="relative min-h-screen bg-[#070f1a] text-white flex flex-col justify-between overflow-hidden border-b border-white/20">
+      {/* ═══ ENERBLOCK-STYLE ARCHITECTURAL HERO (LOCKED TO EXACT SCREEN HEIGHT) ═══ */}
+      <section className="relative h-screen max-h-screen max-h-dvh h-dvh bg-[#070f1a] text-white flex flex-col overflow-hidden border-b border-white/20">
         {/* Full-bleed architectural panoramic glass background */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -127,17 +127,17 @@ export default function AboutPage() {
           />
         </div>
 
-        {/* 2x2 Grid with hairline crosshair dividing lines */}
-        <div className="relative z-10 grid flex-1 grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 min-h-screen">
+        {/* 2x2 Grid with hairline crosshair dividing lines (fills exact viewport) */}
+        <div className="relative z-10 grid flex-1 grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 h-full max-h-full overflow-hidden">
           {/* 1. TOP-LEFT QUADRANT: Company Eyebrow + Bold Headline */}
-          <div className="relative flex flex-col justify-end p-6 pt-28 sm:p-10 sm:pt-32 lg:p-16 lg:pt-36 border-b border-white/20 lg:border-r border-white/20">
-            <p className="m-0 font-mono text-xs uppercase tracking-[0.25em] text-white/70 font-semibold mb-4 sm:mb-6">
+          <div className="relative flex flex-col justify-end p-6 pt-20 sm:p-8 sm:pt-24 lg:p-12 lg:pt-28 border-b border-white/20 lg:border-r border-white/20 overflow-hidden">
+            <p className="m-0 font-mono text-xs uppercase tracking-[0.25em] text-white/70 font-semibold mb-3 sm:mb-4">
               COMPANY
             </p>
             <SplitWordReveal
               as="h1"
-              className="m-0 max-w-[15ch] font-extrabold font-metropolis text-white leading-[1.08] tracking-[-0.035em]"
-              style={{ fontSize: "clamp(2.4rem, 4.8vw, 4.5rem)" }}
+              className="m-0 max-w-[16ch] font-extrabold font-metropolis text-white leading-[1.08] tracking-[-0.035em]"
+              style={{ fontSize: "clamp(1.9rem, 3.6vw, 3.5rem)" }}
               text="We industrialize construction through a digitalized methodology"
               delay={0.15}
               stagger={0.03}
@@ -146,18 +146,18 @@ export default function AboutPage() {
           </div>
 
           {/* 2. TOP-RIGHT QUADRANT: Empty area with Cursor Tracker */}
-          <div className="relative hidden lg:block border-b border-white/20 min-h-[340px]">
+          <div className="relative hidden lg:block border-b border-white/20 h-full overflow-hidden">
             <CursorTracker theme="dark" />
           </div>
 
           {/* 3. BOTTOM-LEFT QUADRANT: Empty area with Cursor Tracker */}
-          <div className="relative hidden lg:block border-r border-white/20 min-h-[340px]">
+          <div className="relative hidden lg:block border-r border-white/20 h-full overflow-hidden">
             <CursorTracker theme="dark" />
           </div>
 
           {/* 4. BOTTOM-RIGHT QUADRANT: Strategic Paragraph Description */}
-          <div className="relative flex flex-col justify-center p-6 sm:p-10 lg:p-16 border-t border-white/20 lg:border-t-0">
-            <p className="m-0 text-white/90 text-[1.1rem] sm:text-[1.25rem] lg:text-[1.35rem] leading-[1.6] font-normal max-w-[560px]">
+          <div className="relative flex flex-col justify-center p-6 sm:p-8 lg:p-12 border-t border-white/20 lg:border-t-0 h-full overflow-hidden">
+            <p className="m-0 text-white/90 text-[1rem] sm:text-[1.125rem] lg:text-[1.2rem] leading-[1.55] font-normal max-w-[540px]">
               We deliver certainty through industrialized, digitized components that connect design, architecture, engineering, production, assembly and certification—ensuring measurable results in every project.
             </p>
           </div>
