@@ -147,12 +147,12 @@ export default function AboutPage() {
 
           {/* 2. TOP-RIGHT QUADRANT: Empty area with Cursor Tracker */}
           <div className="relative hidden lg:block border-b border-white/20 h-full overflow-hidden">
-            <CursorTracker theme="dark" />
+            <CursorTracker theme="dark" syncId="about-hero" />
           </div>
 
           {/* 3. BOTTOM-LEFT QUADRANT: Empty area with Cursor Tracker */}
           <div className="relative hidden lg:block border-r border-white/20 h-full overflow-hidden">
-            <CursorTracker theme="dark" />
+            <CursorTracker theme="dark" syncId="about-hero" />
           </div>
 
           {/* 4. BOTTOM-RIGHT QUADRANT: Strategic Paragraph Description */}
