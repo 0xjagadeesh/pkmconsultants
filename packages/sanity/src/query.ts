@@ -281,6 +281,40 @@ export const queryBlogPaths = defineQuery(`
   *[_type == "blog" && defined(slug.current)].slug.current
 `);
 
+// ─── Project Queries ─────────────────────────────────────────────────────────
+
+const projectCardFragment = /* groq */ `
+  _type,
+  _id,
+  title,
+  category,
+  client,
+  completedYear,
+  description,
+  tags,
+  "slug": slug.current,
+  ${imageFragment}
+`;
+
+export const queryAllProjects = defineQuery(`
+  *[_type == "project" && defined(slug.current)] | order(orderRank asc){
+    ${projectCardFragment}
+  }
+`);
+
+export const queryProjectBySlug = defineQuery(`
+  *[_type == "project" && slug.current == $slug][0]{
+    ${projectCardFragment},
+    ${richTextFragment}
+  }
+`);
+
+export const queryProjectPaths = defineQuery(`
+  *[_type == "project" && defined(slug.current)].slug.current
+`);
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const ogFieldsFragment = /* groq */ `
   _id,
   _type,

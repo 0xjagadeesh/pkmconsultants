@@ -1,46 +1,202 @@
 @import "tailwindcss";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
-@source "../**/*.{ts,tsx}";
+@source "../../../packages/**/*.{ts,tsx}";
+@source "../../../packages/ui/**/*.{ts,tsx}";
 
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* ══════════════════════════════════════════════════════
+   LOCAL FONTS
+   Served from /public/fonts/... → /fonts/...
+══════════════════════════════════════════════════════ */
+
+/* ── Metropolis ── */
+@font-face {
+  font-family: "Metropolis";
+  src: url("/fonts/metropolis/Metropolis-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metropolis";
+  src: url("/fonts/metropolis/Metropolis-LightItalic.woff") format("woff");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metropolis";
+  src: url("/fonts/metropolis/Metropolis-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metropolis";
+  src: url("/fonts/metropolis/Metropolis-RegularItalic.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: "Metropolis";
+  src: url("/fonts/metropolis/Metropolis-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metropolis";
+  src: url("/fonts/metropolis/Metropolis-BoldItalic.woff") format("woff");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Lumierepolis ── */
+@font-face {
+  font-family: "Lumierepolis";
+  src: url("/fonts/lumierepolis/Lumierepolis-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lumierepolis";
+  src: url("/fonts/lumierepolis/Lumierepolis-LightItalic.woff") format("woff");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lumierepolis";
+  src: url("/fonts/lumierepolis/Lumierepolis-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lumierepolis";
+  src: url("/fonts/lumierepolis/Lumierepolis-Italic.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lumierepolis";
+  src: url("/fonts/lumierepolis/Lumierepolis-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Lumierepolis";
+  src: url("/fonts/lumierepolis/Lumierepolis-BoldItalic.woff") format("woff");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Mosvita ── */
+@font-face {
+  font-family: "Mosvita";
+  src: url("/fonts/mosvita/Mosvita-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mosvita";
+  src: url("/fonts/mosvita/Mosvita-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mosvita";
+  src: url("/fonts/mosvita/Mosvita-SemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mosvita";
+  src: url("/fonts/mosvita/Mosvita-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Pillar / Piller ── */
+@font-face {
+  font-family: "Pillar";
+  src: url("/fonts/piller/Pillar.otf") format("opentype"),
+       url("/fonts/piller/Pillar.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Piller";
+  src: url("/fonts/piller/Pillar.otf") format("opentype"),
+       url("/fonts/piller/Pillar.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ══════════════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════════════ */
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* ── New palette ──────────────────────────────────
+     1. #261CC1  — Brand / primary (violet-blue)
+     2. #dedcff  — Secondary (light lavender)
+     3. #f7fbff  — Background (alice blue)
+     4. #1e1926  — Foreground / text (deep purple-black)
+  ─────────────────────────────────────────────────── */
+  --brand: #261CC1;
+  --brand-dark: #1a1396;
+  --background: #f7fbff;
+  --foreground: #1e1926;
+  --card: #fafdff;
+  --card-foreground: #1e1926;
+  --popover: #f7fbff;
+  --popover-foreground: #1e1926;
+  --primary: #261CC1;
+  --primary-foreground: #f7fbff;
+  --secondary: #dedcff;
+  --secondary-foreground: #1e1926;
+  --muted: #dedcff;
+  --muted-foreground: #5b5a8a;
+  --accent: #261CC1;
+  --accent-foreground: #f7fbff;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --border: #c4c2e8;
+  --input: #c4c2e8;
+  --ring: #261CC1;
+  --chart-1: #261CC1;
+  --chart-2: #dedcff;
+  --chart-3: #4a3fa8;
+  --chart-4: #6f5fd0;
+  --chart-5: #b8aed8;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #f7fbff;
+  --sidebar-foreground: #1e1926;
+  --sidebar-primary: #261CC1;
+  --sidebar-primary-foreground: #f7fbff;
+  --sidebar-accent: #dedcff;
+  --sidebar-accent-foreground: #1e1926;
+  --sidebar-border: #c4c2e8;
+  --sidebar-ring: #261CC1;
 }
 
 .dark {
@@ -78,7 +234,17 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* ══════════════════════════════════════════════════════
+   TAILWIND v4 THEME TOKENS
+   font-metropolis | font-lumierepolis | font-mosvita
+   font-sans is remapped to Metropolis (the app default)
+══════════════════════════════════════════════════════ */
 @theme inline {
+  /* brand */
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+
+  /* colours */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -115,17 +281,65 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── fonts ── */
+  --font-sans:         "Metropolis", ui-sans-serif, system-ui, sans-serif;
+  --font-metropolis:   "Metropolis", ui-sans-serif, system-ui, sans-serif;
+  --font-lumierepolis: "Lumierepolis", ui-sans-serif, system-ui, sans-serif;
+  --font-mosvita:      "Mosvita", ui-sans-serif, system-ui, sans-serif;
+  --font-suisse:       suisse, "suisse Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-pillar:       "Pillar", "Piller", ui-sans-serif, system-ui, sans-serif;
+  --font-piller:       "Pillar", "Piller", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:         ui-monospace, "Cascadia Code", monospace;
 }
 
+/* ══════════════════════════════════════════════════════
+   BASE STYLES
+══════════════════════════════════════════════════════ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    /* Metropolis as the default via --font-sans remapped above */
+    @apply bg-background text-foreground font-sans antialiased;
+    font-weight: 400; /* Default to Metropolis Regular */
   }
 }
 
+/* ══════════════════════════════════════════════════════
+   CUSTOM ANIMATIONS & UTILITIES
+══════════════════════════════════════════════════════ */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@utility animate-ticker {
+  animation: ticker 32s linear infinite;
+}
+
+/* ══════════════════════════════════════════════════════
+   NAV LINK — character-split hover animation
+   Each <span> inside .nav-link__label slides up on hover.
+   transition-delay is set inline per character.
+══════════════════════════════════════════════════════ */
+.nav-link__label span {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity  0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+a:hover .nav-link__label span {
+  transform: translateY(-105%);
+  opacity: 0;
+}
+
+/* ══════════════════════════════════════════════════════
+   GLOBAL IMG DEFAULTS
+══════════════════════════════════════════════════════ */
 img {
   display: block;
   max-width: 100%;

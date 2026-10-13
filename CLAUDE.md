@@ -1,131 +1,163 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) and AI agents when working with code in this repository.
 
-## Project Overview
+---
 
-Turbo Start Sanity — a pnpm monorepo (Turborepo) with a Next.js 16 frontend and Sanity v5 CMS Studio. Uses Biome/Ultracite for linting/formatting.
+## 1. Project Overview
 
-## Commands
+**PKM Consultants** — High-end website and content management platform for a premier MEPF (Mechanical, Electrical, Plumbing, and Fire Protection) Engineering and Architectural Consultancy based in Chennai, India.
+
+- **Frontend (`apps/web`)**: Next.js 16 (App Router, React 19, React Compiler, Turbopack, Tailwind CSS v4, GSAP & ScrollTrigger).
+- **CMS (`apps/studio`)**: Sanity Studio v5 (Vite, `@sanity/icons`, styled-components).
+- **Packages (`packages/`)**:
+  - `@workspace/ui`: Shared UI primitives, design tokens, and styles.
+  - `@workspace/sanity`: Sanity client, typed GROQ queries, live preview, and image loaders.
+  - `@workspace/env`: Zod-validated environment variables (`@t3-oss/env-nextjs`).
+  - `@workspace/logger`: Structured context logger.
+  - `typescript-config`: Centralized TypeScript configs.
+
+---
+
+## 2. Commands & Workflow
+
+All commands must be executed using **pnpm** (pnpm 10+):
 
 ```bash
-# Development (both apps)
-pnpm dev
-
-# Individual apps
-pnpm dev:web          # Next.js on localhost:3000 (Turbopack)
-pnpm dev:studio       # Sanity Studio on localhost:3333
+# Development
+pnpm dev              # Start both apps (Web on localhost:3000, Studio on localhost:3333)
+pnpm dev:web          # Next.js only (with Turbopack)
+pnpm dev:studio       # Sanity Studio only
 
 # Build
-pnpm build            # All packages
-pnpm build:web        # Next.js only
-pnpm build:studio     # Studio only
+pnpm build            # Build all packages via Turborepo
+pnpm build:web        # Build Next.js web application
+pnpm build:studio     # Build Sanity Studio
 
-# Lint & Format (Biome/Ultracite, NOT ESLint/Prettier)
-pnpm lint             # Lint all
-pnpm format           # Format all (auto-fix)
-pnpm format:check     # Check formatting without fixing
-pnpm check-types      # TypeScript type checking
+# Lint & Format (Biome / Ultracite — NOT ESLint / Prettier)
+pnpm lint             # Lint all workspaces
+pnpm format           # Auto-format all files
+pnpm format:check     # Check formatting without writing
+pnpm check-types      # TypeScript type checking across monorepo
 
-# Per-package lint/format
-cd apps/web && pnpm lint
-cd apps/studio && pnpm format
-
-# Sanity type generation (run from apps/studio after schema changes)
-pnpm type             # Extracts schema + generates types
-pnpm extract          # Schema extract only
+# Sanity Type Generation (Run from apps/studio after schema updates)
+pnpm type             # Extract schema & regenerate TypeScript types
+pnpm extract          # Schema extraction only
 ```
 
-## Monorepo Structure
+---
 
-```
-apps/
-  web/         — Next.js 16 (App Router, React 19, React Compiler, Tailwind v4)
-  studio/      — Sanity Studio v5 (Vite, styled-components)
-packages/
-  env/         — @workspace/env — Zod-validated env vars via @t3-oss/env-nextjs
-  sanity/      — @workspace/sanity — Shared Sanity client, GROQ queries, live preview, image utils
-  ui/          — @workspace/ui — Shared UI components (Radix + CVA + Tailwind, shadcn-style)
-  logger/      — @workspace/logger — Structured logger class with context prefixes
-  typescript-config/ — Shared TS configs
-```
+## 3. Design System & Visual Identity
 
-## Architecture
+The design language reflects **precision engineering, architectural minimalism, and dynamic motion**. It avoids standard template styles in favor of sharp technical gridlines, high-contrast typography, and smooth GSAP-driven micro-interactions.
 
-### Data Flow: Sanity → Next.js
+### 3.1 Color Palette
 
-1. **Schema** defined in `apps/studio/schemaTypes/` (documents, blocks, definitions)
-2. **Type generation**: `pnpm type` in studio extracts schema → generates TS types at `packages/sanity/src/sanity.types.ts`
-3. **GROQ queries** live in `packages/sanity/src/query.ts` using `defineQuery` from `next-sanity`, with reusable fragments
-4. **Data fetching** uses `sanityFetch` from `packages/sanity/src/live.ts` (wraps `defineLive` for automatic revalidation)
-5. **Client** configured in `packages/sanity/src/client.ts` with stega for visual editing
+| Token | Hex Value | Role & Usage |
+|---|---|---|
+| **Primary / Brand** | `#261CC1` | Signature royal cobalt blue. Used for primary CTAs, active highlights, key metrics, and hero accents. |
+| **Brand Dark** | `#1a1396` | Deepened brand blue for hover states and pressed interactions. |
+| **Background** | `#f7fbff` / `#f0f8ff` | Alice blue / clean off-white tinted surface. Default canvas across all main sections. |
+| **Secondary / Tint** | `#dedcff` | Soft lavender blue. Used for pills, badges, subtle card fills, and secondary buttons. |
+| **Border / Divider** | `#c4c2e8` / `#1212121a` | Crisp technical gridlines (1px to 1.2px borders with subtle alpha transparency). |
+| **Foreground / Text** | `#1e1926` / `#121212` | Deep purple-black charcoal for razor-sharp readability on light backgrounds. |
+| **Muted Text** | `#555555` / `#5b5a8a` | Balanced secondary narrative text and technical captions. |
+| **Dark Inversions** | `#0d0c11` / `#1e1926` | Deep obsidian surfaces for high-impact contrast zones (Prefooter, Mobile Menu). |
+| **Button Surface** | `#f7fbff` | Crisp light button face with dynamic fast-animating hover borders. |
 
-### Page Builder Pattern
+### 3.2 Typography Hierarchy
 
-The core content model is a **page builder** — an array of typed blocks:
+Custom local fonts are served via `/fonts/` and integrated into Tailwind v4:
 
-- **Studio side**: `apps/studio/schemaTypes/blocks/` — each block is a `defineType({ type: 'object' })`. Registered in `blocks/index.ts` → fed to `definitions/pagebuilder.ts`
-- **Frontend side**: `apps/web/src/components/pagebuilder.tsx` — maps `_type` to React component via `BLOCK_COMPONENTS` record. Includes Sanity visual editing data attributes and optimistic updates
-- **Block components**: `apps/web/src/components/sections/` — one file per block type (hero, cta, faq-accordion, etc.)
+- **Metropolis** (`--font-metropolis`, default `--font-sans`): Primary body, section headlines, and architectural labels.
+- **Mosvita** (`--font-mosvita`): Modern geometric grotesque used for buttons, navigation links, and kicker badges.
+- **Lumierepolis** (`--font-lumierepolis`): Monospaced-inspired uppercase engineering eyebrows and subheadings.
+- **Pillar / Piller** (`--font-pillar`): Ultra-bold monumental font used for oversized watermark layers (e.g. Footer watermark).
+- **Suisse** (`--font-suisse`): Neutral, refined typography for structured lists, footer navigation, and metadata.
 
-To add a new page builder block:
-1. Create schema in `apps/studio/schemaTypes/blocks/new-block.ts`
-2. Add to `apps/studio/schemaTypes/blocks/index.ts` array
-3. Run `pnpm type` in studio
-4. Add GROQ fragment in `packages/sanity/src/query.ts` and include in `pageBuilderFragment`
-5. Create component in `apps/web/src/components/sections/`
-6. Register in `BLOCK_COMPONENTS` in `apps/web/src/components/pagebuilder.tsx`
+### 3.3 Core Design Rules
 
-### Sanity Document Types
+1. **Sharp Architectural Corners**: Elements, cards, and buttons use zero or minimal border-radius (`rounded-none` or `rounded-sm`), emphasizing technical structural drafting blueprints.
+2. **Technical Gridlines**: Divide sections with continuous 1px or 1.2px border dividers (`divide-x`, `divide-y`, `border-[#261CC1]/80`, `border-[#121212]/15`, `border-white/15`).
+3. **High-Performance Hover & Fast Border Transitions**:
+   - Button borders on hover animate with rapid transitions (`0.2s` - `0.3s`, `cubic-bezier(0.16, 1, 0.3, 1)`).
+   - Character-split upward roll or slide effects on interactive link labels.
+4. **GSAP & ScrollTrigger Choreography**: Smooth continuous parallax, mask-reveal headings, and scroll-pinned stacking cards.
 
-**Singletons** (one instance each): `homePage`, `blogIndex`, `settings`, `footer`, `navbar`
-**Documents**: `blog`, `page`, `faq`, `author`, `redirect`
-**Pages** use nested slug-based structure (`apps/studio/components/nested-pages-structure.tsx`)
+---
 
-### Environment Variables
+## 4. Homepage Structure (`apps/web/src/app/page.tsx`)
 
-**`apps/web/.env.local`**: `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET`, `NEXT_PUBLIC_SANITY_API_VERSION`, `NEXT_PUBLIC_SANITY_STUDIO_URL`, `SANITY_API_READ_TOKEN`, `SANITY_API_WRITE_TOKEN`
+The home page is an editorial showcase of PKM Consultants' capabilities, organized into continuous architectural sections:
 
-**`apps/studio/.env.local`**: `SANITY_STUDIO_PROJECT_ID`, `SANITY_STUDIO_DATASET`, `SANITY_STUDIO_TITLE`, `SANITY_STUDIO_PRESENTATION_URL`, `SANITY_STUDIO_API_VERSION`
+1. **Hero Section (`Hero`)**:
+   - Split CSS Grid layout with fixed crosshair divider lines (`top: 400px`, `left: 35% / 480px`).
+   - Top-left quadrant: Staggered `SplitWordReveal` ("MEPF" / "Design Firm").
+   - Top-right quadrant: Interactive `CursorTracker` coordinate physics sandbox.
+   - Bottom-left quadrant: Architectural mission statement in `SplitWordReveal`.
+   - Bottom-right quadrant: Solid brand background (`#261CC1`) with blueprint grid overlay, monumental headline, and `AnimatedCTAButton`.
+2. **Building Lifelines (`BuildingParallax`)**:
+   - High-impact GSAP parallax sequence showcasing structural construction engineering.
+3. **Scroll Reveal Split (`ScrollRevealSplit`)**:
+   - Two-column dual-aspect photo reveal triggered by vertical scroll progress.
+4. **MEPF Exploded View (`MepfExplode`)**:
+   - Interactive 3D layer exploded diagram demonstrating coordinated Mechanical, Electrical, Plumbing, and Fire systems.
+5. **Solutions Stack (`SolutionsStack`)**:
+   - Sticky card stack with `25vh` dwell spacing covering the 5 core disciplines:
+     - 01 HVAC Design & Engineering
+     - 02 Plumbing & Public Health Engineering (PHE)
+     - 03 Electrical Design: HT & LT Power Systems
+     - 04 Fire Protection & Life Safety
+     - 05 Extra Low Voltage (ELV) & Building Automation
+6. **Image Parallax Section (`ImageParallaxSection`)**:
+   - Full-bleed architectural metal structure banner with smooth parallax depth.
+7. **Value Pillars (`ValuePillars`)**:
+   - 2-column layout with left-hand `MaskRevealText` and right-hand 3-panel interactive system guarantees accordion (Speed & Turnaround, Budget Precision, Code Compliance & Certification).
+8. **Matrix Showcase Sections (`MatrixSection`)**:
+   - Editorial split cards featuring sticky text on one side and `ImageClipReveal` crosshair interaction on the other:
+     - Section 1: "A consistent design process on every project" (Image left).
+     - Section 2: "Proven Project Experience" (Image right).
+9. **Prefooter Architectural Callout (`Prefooter`)**:
+   - Obsidian dark background (`#0d0c11`) with copper background parallax image.
+   - Dual-row grid layout: Top cell displays project narrative; Bottom cell displays oversized display headline and `ButtonZoomIn` ("Contact").
+10. **Global Footer (`Footer`)**:
+    - Monumental background watermark layer (`PKM Consultants` rendered with `--font-pillar`).
+    - Brand identity, contact info, and 4-column directory navigation.
 
-All env vars are Zod-validated at startup via `@workspace/env` (client and server exports).
+---
 
-### Types Strategy
+## 5. Key Interactive Components (`apps/web/src/components/`)
 
-All frontend types derive from generated Sanity types. `apps/web/src/types.ts` extracts narrow types from query results using `Extract`, `NonNullable`, and index access — never manually duplicate Sanity shapes.
+- **`ButtonZoomIn` (`buttonzoomin.tsx`)**:
+  - Dual-compartment architectural button with 1px border matching outline and interior divider.
+  - Right compartment holds brand-accented (`#261CC1`) sliding arrow.
+  - GSAP roll-up text animation on hover with responsive fast border transition.
+- **`AnimatedCTAButton` (`animated-cta-button.tsx`)**:
+  - High-visibility action button with clean slide transition and icon tracking.
+- **`SplitWordReveal` (`split-word-reveal.tsx`)**:
+  - Word-level staggered entrance with interactive mouseover color shift.
+- **`MaskRevealText` (`mask-reveal-text.tsx`)**:
+  - Curtain wipe reveal effect for prominent editorial headlines.
+- **`CursorTracker` (`cursor-tracker.tsx`)**:
+  - Real-time interactive coordinate tracking sandbox with dynamic SVG line mapping.
+- **`ImageClipReveal` (`image-clip-reveal.tsx`)**:
+  - Architectural crosshair tracking with polygon clipping for imagery.
+- **`Navbar` (`navbar.tsx`)**:
+  - Glass-morphic / sticky header with character-staggered animated nav links and fullscreen modal overlay menu.
 
-### Visual Editing & Live Preview
+---
 
-- Sanity Presentation Tool configured in `sanity.config.ts` with `presentationTool`
-- Next.js uses `VisualEditing` from `next-sanity/visual-editing` in layout (draft mode only)
-- `createDataAttribute` used throughout page builder for click-to-edit in Presentation
-- `SanityLive` component enables automatic content revalidation
+## 6. Architecture & Code Conventions
 
-## Conventions
+### 6.1 Data Flow: Sanity to Next.js
+- **Schemas**: Defined in `apps/studio/schemaTypes/`. Run `pnpm type` in `apps/studio` after changing any schema.
+- **Queries**: GROQ queries live in `packages/sanity/src/query.ts` using `defineQuery`.
+- **Fetching**: Use `sanityFetch` from `@workspace/sanity/live` for automatic live revalidation.
+- **Images**: Use `SanityImage` from `@/components/elements/sanity-image` for responsive CDN delivery and LQIP blur.
 
-### File Naming
-- **kebab-case** for all files: `feature-cards-icon.ts`, `blog-card.tsx`
-- `.tsx` for React components, `.ts` for utilities
-
-### Sanity Schema
-- Always use `defineType`, `defineField`, `defineArrayMember` from `sanity`
-- Include `description` on every field (written for non-technical users)
-- Icons: prefer `@sanity/icons`, fall back to `lucide-react`
-- GROQ: don't expand images unless explicitly needed. Use `defineQuery` from `next-sanity`
-
-### Frontend
-- Prefer `grid` over `flex` unless two sibling elements
-- Use `SanityImage` component for Sanity images (from `sanity-image` library)
-- Use `SanityButtons` resolver for button arrays
-- Shared UI components in `@workspace/ui` (Radix + CVA pattern)
-
-### Formatting (Biome)
-- Double quotes, semicolons, trailing commas (ES5), 2-space indent, 80 char line width
-- Import ordering: node/packages → blank line → aliases/paths
-- `noConsole: warn`, `noExplicitAny: warn`
-- Use `@workspace/logger` Logger class instead of raw `console.*`
-
-### Node/Runtime
-- Node >= 22 required
-- pnpm 10.28.0 (corepack)
-- Turborepo handles task orchestration — `transit` task runs before lint/format/check-types
+### 6.2 Code Style & Guidelines
+- **File Naming**: Strict `kebab-case` for all files (`value-pillars.tsx`, `solutions-stack.tsx`, `buttonzoomin.tsx`).
+- **Formatting**: Biome (`pnpm format`). Double quotes, semicolons, trailing commas (ES5), 2-space indentation.
+- **No Console**: Use `@workspace/logger` instead of native `console.log`.
+- **Layouts**: Prefer CSS Grid over Flexbox for complex architectural layouts.
+- **Types**: Derive all UI data types directly from Sanity generated types in `packages/sanity/src/sanity.types.ts` via narrow helpers (`Extract`, `NonNullable`).
