@@ -1,8 +1,6 @@
-# Turbo Start Sanity
+# PKM Consultants
 
-![Turbo Start Sanity](https://raw.githubusercontent.com/robotostudio/turbo-start-sanity/main/tasteful-safe-option-og.png)
-
-## A bare-metal, nitro-fuelled Sanity template welded in the garage of Roboto Studio. Ready to rip with pagebuilders, hyper-optimised SEO, and a need for speed.
+PKM Consultants web application and CMS built with Next.js and Sanity Studio.
 
 ![Engine Divider](https://raw.githubusercontent.com/robotostudio/turbo-start-sanity/main/engine-divider.png)
 
