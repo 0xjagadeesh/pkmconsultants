@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatedCTAButton } from "@/components/animated-cta-button";
+import { CursorTracker } from "@/components/cursor-tracker";
 import { ImageParallaxSection } from "@/components/image-parallax-section";
 import { Prefooter } from "@/components/prefooter";
 import { SplitWordReveal } from "@/components/split-word-reveal";
@@ -107,36 +108,59 @@ const GRID_BG = {
 export default function AboutPage() {
   return (
     <>
-      {/* ═══ HERO ═══ */}
-      <section className="border-[#261CC1]/80 border-b-[1.2px] bg-[#f7fbff] pt-28 lg:pt-36">
-        <div className="grid gap-8 pb-12 lg:grid-cols-[35%_1fr] lg:gap-0 lg:pb-16 xl:grid-cols-[480px_1fr]">
-          <div className="px-5 lg:border-[#261CC1]/80 lg:border-r-[1.2px] lg:px-10">
-            <p className={LABEL}>About us</p>
-          </div>
-          <div className="flex flex-col gap-8 px-5 lg:px-14">
-            <SplitWordReveal
-              as="h1"
-              className="m-0 max-w-[18ch] font-extrabold font-metropolis text-[#1e1926] leading-[1.05] tracking-[-0.035em]"
-              style={{ fontSize: "clamp(2.4rem, 6.5vw, 5rem)" }}
-              text="We design building systems as one coordinated whole."
-            />
-            <p className={`${BODY} max-w-[520px] text-[#1e1926] lg:ml-auto`}>
-              PKM Consultants connects HVAC, plumbing, electrical, fire
-              protection and ELV design into a single process, so every
-              commercial, industrial and high-rise project reaches site with
-              drawings that agree with each other.
-            </p>
-          </div>
-        </div>
-        <div className="relative aspect-[4/5] border-[#261CC1]/80 border-t-[1.2px] sm:aspect-[16/9] lg:aspect-[21/9]">
+      {/* ═══ ENERBLOCK-STYLE ARCHITECTURAL HERO ═══ */}
+      <section className="relative min-h-screen bg-[#070f1a] text-white flex flex-col justify-between overflow-hidden border-b border-white/20">
+        {/* Full-bleed architectural panoramic glass background */}
+        <div className="absolute inset-0 z-0">
           <Image
-            alt="Engineer reviewing coordinated HVAC, electrical and plumbing drawings"
-            className="object-cover"
+            alt="Modern architectural glass building overlooking skyline"
+            className="object-cover object-center brightness-[0.70] contrast-[1.1] saturate-[0.9]"
             fill
             priority
             sizes="100vw"
-            src="/images/mep-design-process.webp"
+            src="/images/about-hero-bg.jpg"
           />
+          {/* Subtle atmosphere & glass tint overlay */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-b from-black/45 via-slate-950/25 to-slate-950/75 backdrop-blur-[0.5px]"
+          />
+        </div>
+
+        {/* 2x2 Grid with hairline crosshair dividing lines */}
+        <div className="relative z-10 grid flex-1 grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 min-h-screen">
+          {/* 1. TOP-LEFT QUADRANT: Company Eyebrow + Bold Headline */}
+          <div className="relative flex flex-col justify-end p-6 pt-28 sm:p-10 sm:pt-32 lg:p-16 lg:pt-36 border-b border-white/20 lg:border-r border-white/20">
+            <p className="m-0 font-mono text-xs uppercase tracking-[0.25em] text-white/70 font-semibold mb-4 sm:mb-6">
+              COMPANY
+            </p>
+            <SplitWordReveal
+              as="h1"
+              className="m-0 max-w-[15ch] font-extrabold font-metropolis text-white leading-[1.08] tracking-[-0.035em]"
+              style={{ fontSize: "clamp(2.4rem, 4.8vw, 4.5rem)" }}
+              text="We industrialize construction through a digitalized methodology"
+              delay={0.15}
+              stagger={0.03}
+              hoverColor="#38bdf8"
+            />
+          </div>
+
+          {/* 2. TOP-RIGHT QUADRANT: Empty area with Cursor Tracker */}
+          <div className="relative hidden lg:block border-b border-white/20 min-h-[340px]">
+            <CursorTracker theme="dark" />
+          </div>
+
+          {/* 3. BOTTOM-LEFT QUADRANT: Empty area with Cursor Tracker */}
+          <div className="relative hidden lg:block border-r border-white/20 min-h-[340px]">
+            <CursorTracker theme="dark" />
+          </div>
+
+          {/* 4. BOTTOM-RIGHT QUADRANT: Strategic Paragraph Description */}
+          <div className="relative flex flex-col justify-center p-6 sm:p-10 lg:p-16 border-t border-white/20 lg:border-t-0">
+            <p className="m-0 text-white/90 text-[1.1rem] sm:text-[1.25rem] lg:text-[1.35rem] leading-[1.6] font-normal max-w-[560px]">
+              We deliver certainty through industrialized, digitized components that connect design, architecture, engineering, production, assembly and certification—ensuring measurable results in every project.
+            </p>
+          </div>
         </div>
       </section>
 
