@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { MOTION_OK } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,84 +16,174 @@ const SUISSE_FONT_STACK =
 
 const YEAR = new Date().getFullYear();
 
+// Reference size used to measure the wordmark before scaling it to fit
+const WORDMARK_PROBE = 100;
+// Pillar's cap height (no descenders in the wordmark) and ascent, in em.
+// The wordmark's layout box is made exactly the ink height, so there is no
+// dead space above or below the letters.
+const WORDMARK_INK = 0.68;
+const WORDMARK_ASCENT = 0.75;
+// With line-height = INK the caps poke this far (em) above the line box.
+// Padding it back in on top and pulling the same amount off the bottom leaves
+// a layout box that starts at the cap top and ends at the baseline.
+const WORDMARK_OVERSHOOT =
+  (1 - WORDMARK_INK) / 2 - (WORDMARK_ASCENT - WORDMARK_INK);
+// From lg up the footer is exactly one screen tall; the wordmark fills what's left
+const FIT_HEIGHT_QUERY = "(min-width: 1024px)";
+
+// Shared 3-column grid so blocks, top strip and bottom row line up
+const FOOTER_COLS = "lg:grid-cols-[1.05fr_1fr_1fr]";
+
+// Below lg: Sec. 01 spans the full width, Sec. 02 and 03 sit side by side.
+// From lg: three columns split by vertical gridlines.
+const BLOCK_BORDERS = [
+  "col-span-2 lg:col-span-1",
+  "border-t border-r lg:border-t-0 lg:border-r-0 lg:border-l",
+  "border-t lg:border-t-0 lg:border-l",
+];
+
 interface NavLink {
   label: string;
   href: string;
   external?: boolean;
 }
 
-interface NavSection {
-  title: string;
-  links: NavLink[];
+interface FooterBlock {
+  label: string;
+  /** One or two link columns, pinned to the bottom of the block */
+  columns: NavLink[][];
+  /** Optional line under the links (e.g. location) */
+  note?: string;
 }
 
-const NAV_SECTIONS: NavSection[] = [
+const FOOTER_BLOCKS: FooterBlock[] = [
   {
-    title: "Services",
-    links: [
-      { label: "MEPF Engineering", href: "/services" },
-      { label: "Electrical Design", href: "/services" },
-      { label: "HVAC Design", href: "/services" },
-      { label: "Fire & Life Safety", href: "/services" },
-      { label: "PHE Design", href: "/services" },
+    label: "Sec. 01",
+    columns: [
+      [
+        { label: "About Us", href: "/about" },
+        { label: "Projects", href: "/projects" },
+        { label: "Our Story", href: "/about" },
+        { label: "Careers", href: "/contact" },
+      ],
+      [
+        { label: "MEPF Engineering", href: "/services" },
+        { label: "HVAC Design", href: "/services" },
+        { label: "Electrical Design", href: "/services" },
+        { label: "PHE Design", href: "/services" },
+        { label: "Fire & Life Safety", href: "/services" },
+      ],
     ],
   },
   {
-    title: "Company",
-    links: [
-      { label: "About Us", href: "/about" },
-      { label: "Projects", href: "/projects" },
-      { label: "Our Story", href: "/about" },
-      { label: "Careers", href: "/contact" },
+    label: "Sec. 02",
+    columns: [
+      [
+        { label: "Case Studies", href: "/projects" },
+        { label: "Insights & Blog", href: "/blog" },
+        { label: "Contact Us", href: "/contact" },
+      ],
     ],
   },
   {
-    title: "Expertise",
-    links: [
-      { label: "Case Studies", href: "/projects" },
-      // { label: "Green Building & LEED", href: "/services" },
-      // { label: "Codes & Standards", href: "/services" },
-      { label: "Insights & Blog", href: "/blog" },
+    label: "Sec. 03",
+    columns: [
+      [
+        {
+          label: "info@pkmconsultants.in",
+          href: "mailto:info@pkmconsultants.in",
+        },
+        { label: "+91 98765 43210", href: "tel:+919876543210" },
+        { label: "LinkedIn", href: "https://linkedin.com", external: true },
+      ],
     ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { label: "Contact Us", href: "/contact" },
-      {
-        label: "info@pkmconsultants.in",
-        href: "mailto:info@pkmconsultants.in",
-      },
-      { label: "+91 98765 43210", href: "tel:+919876543210" },
-      { label: "LinkedIn", href: "https://linkedin.com", external: true },
-    ],
+    note: "Chennai, Tamil Nadu, India",
   },
 ];
+
+/** Lets an email wrap after "@" instead of mid-word in narrow columns. */
+function WrapAfterAt({ text }: { text: string }) {
+  const at = text.indexOf("@");
+  if (at === -1) return text;
+  return (
+    <>
+      {text.slice(0, at + 1)}
+      <wbr />
+      {text.slice(at + 1)}
+    </>
+  );
+}
+
+function FooterLink({ link }: { link: NavLink }) {
+  return (
+    <Link
+      href={link.href}
+      {...(link.external ? { target: "_blank", rel: "noreferrer" } : {})}
+      className="inline-flex min-h-11 items-center text-[#121212] text-[0.95rem] transition-colors duration-200 [overflow-wrap:anywhere] hover:text-[#261CC1] sm:text-[1.05rem] lg:text-[1.15rem] lg:pointer-fine:min-h-0 lg:pointer-fine:leading-[1.6]"
+    >
+      <WrapAfterAt text={link.label} />
+    </Link>
+  );
+}
 
 /* ─────────────────────────────────────────────
    MAIN FOOTER COMPONENT
 ───────────────────────────────────────────── */
 export function Footer() {
-  const footerRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const bandRef = useRef<HTMLDivElement>(null);
+  const wordRef = useRef<HTMLSpanElement>(null);
 
+  /* Fit the wordmark to the exact band width (Pillar loads async, so refit on
+     font load and on every resize). */
   useEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
+    const band = bandRef.current;
+    const word = wordRef.current;
+    if (!(band && word)) return;
 
-    const mm = gsap.matchMedia();
+    const fit = () => {
+      const style = getComputedStyle(band);
+      const availableWidth =
+        band.clientWidth -
+        Number.parseFloat(style.paddingLeft) -
+        Number.parseFloat(style.paddingRight);
+      // Height only constrains the wordmark when the footer is screen-locked
+      const availableHeight = window.matchMedia(FIT_HEIGHT_QUERY).matches
+        ? band.clientHeight -
+          Number.parseFloat(style.paddingTop) -
+          Number.parseFloat(style.paddingBottom)
+        : Number.POSITIVE_INFINITY;
 
-    // Full animation (users who allow motion)
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      // Whole footer content rises from behind the sticky bottom bar, tied to scroll
+      word.style.fontSize = `${WORDMARK_PROBE}px`;
+      const measured = word.getBoundingClientRect().width;
+      if (measured <= 0) return;
+      const byWidth = (WORDMARK_PROBE * availableWidth) / measured;
+      const byHeight = availableHeight / WORDMARK_INK;
+      word.style.fontSize = `${Math.max(0, Math.min(byWidth, byHeight))}px`;
+    };
+
+    fit();
+    document.fonts?.ready.then(fit).catch(() => undefined);
+    const observer = new ResizeObserver(fit);
+    observer.observe(band);
+    return () => observer.disconnect();
+  }, []);
+
+  /* Wordmark slides up into its band as the footer scrolls into view. */
+  useEffect(() => {
+    const band = bandRef.current;
+    const word = wordRef.current;
+    if (!(band && word)) return;
+
+    const mm = gsap.matchMedia(band);
+    mm.add(MOTION_OK, () => {
       gsap.fromTo(
-        content,
-        { yPercent: 100 },
+        word,
+        { yPercent: 40 },
         {
           yPercent: 0,
           ease: "none",
           scrollTrigger: {
-            trigger: footerRef.current,
+            trigger: band,
             start: "top bottom",
             end: "bottom bottom",
             scrub: true,
@@ -100,150 +191,124 @@ export function Footer() {
         }
       );
     });
-
-    // Reduced motion: everything visible, no animation
-    mm.add("(prefers-reduced-motion: reduce)", () => {
-      gsap.set(content, { yPercent: 0 });
-    });
-
     return () => mm.revert();
   }, []);
 
   return (
     <footer
-      ref={footerRef}
-      className="relative overflow-clip bg-white text-black font-suisse! "
+      className="relative overflow-hidden bg-[#f7fbff] text-[#121212] lg:flex lg:h-svh lg:flex-col"
       style={{ fontFamily: SUISSE_FONT_STACK }}
     >
-      <div className="relative overflow-hidden">
-        <div className="relative z-10 mx-auto w-full px-6 sm:px-8 max-w-[1180px] mt-6 sm:mt-12 pb-6 sm:mb-12">
-          {/* Background Watermark Layer */}
-          <div
-            aria-hidden="true"
-            ref={contentRef}
-            className="pointer-events-none absolute inset-x-0 -bottom-10 z-0  flex items-end justify-center select-none overflow-hidden   will-change-transform"
-          >
-            <div
-              className="w-full text-center font-pillar text-[clamp(5rem,20vw,24rem)] tracking-wide leading-none text-[#ebf5ff] uppercase whitespace-nowrap will-change-transform"
-              style={{ fontFamily: "'Pillar', 'Piller', sans-serif" }}
-            >
-              PKM Consultants
-            </div>
-          </div>
-
-          {/* Main Grid: Left Column + Nav Columns */}
-          <div className="relative z-10 grid gap-12 lg:grid-cols-[1.3fr_2.4fr] lg:gap-16">
-            {/* Left Column: Brand & Tagline */}
-            <div className="max-w-sm">
-              <Link
-                href="/"
-                aria-label="PKM Consultants home"
-                className="inline-flex items-center self-center justify-center gap-2.5 text-[1.35rem] font-bold tracking-[0.02em] font-mosvita text-black hover:opacity-85 transition-opacity"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 159 132.5"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  className="h-20 w-auto shrink-0 text-black"
-                >
-                  <path
-                    d="M85.59,41.28c.15-7.61-11.45-7.74-11.47-.14,0,7.44,11.3,7.56,11.47.14"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                  <path
-                    d="M83.39,25.89c.16-4.71-7-4.85-7.07-.13,0,4.55,6.91,4.67,7.07.13"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                  <path
-                    d="M81.43,15.41a1.57,1.57,0,1,0-3.14-.12,1.57,1.57,0,0,0,3.14.12"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                  <path
-                    d="M31.34,58.76c-44,30.9-4.44,74.63,48.51,73.25,52.8,1.37,92.46-42.13,48.72-73.11v0c22.05,9.8,40.66,33,25.3,56.56-28.24,41.1-119.53,41.08-147.74,0C-9.24,91.9,9.4,68.66,31.43,58.87"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                  <path
-                    d="M102.33,73.77c23.09,14.48,4.07,37-22.48,36.21-26.7.8-45.63-22-22.26-36.34l0,0C18.79,88,40.75,122,79.86,120.59c38.9,1.37,61.06-32.33,22.52-46.83"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                  <path
-                    d="M91.71,74.13c7.9,8.74.16,22-11.86,21.64-12.27.39-19.93-13.44-11.49-22l.06.06C63.31,75.62,58.18,79,56.24,84.28c-2.15,5.79,1.1,11.53,5.87,14.85,9.75,6.84,25.32,7,35.21.37,4.85-3.21,8.3-8.84,6.33-14.73C101.87,79.46,96.85,76,91.81,74"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                  <path
-                    d="M38.68,118.9c-27-23.91-.63-53.73,35.77-55.4l0,0L80,54.15l5.56,9.37h0C121.88,65.34,148,95.15,121,118.94H121c44-26.1,8.39-67.12-41.13-65.66C30.49,51.82-5.18,92.69,38.65,118.86"
-                    transform="translate(-0.5 -13.75)"
-                  />
-                </svg>
-              </Link>
-
-              <p className="mt-4 text-[0.9375rem] leading-[1.6] text-[#555555]">
-                Precision MEPF engineering, coordination, and integrated
-                building services consultancy.
-              </p>
-
-              <div className="mt-6 flex flex-col gap-2 text-[0.875rem] text-[#555555]">
-                <p>Chennai, Tamil Nadu, India</p>
-                <Link
-                  href="mailto:info@pkmconsultants.in"
-                  className="inline-flex min-h-11 items-center gap-1.5 break-all text-black hover:underline lg:pointer-fine:min-h-0"
-                >
-                  info@pkmconsultants.in
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Nav grid */}
-            <div>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
-                {NAV_SECTIONS.map((section) => (
-                  <div key={section.title}>
-                    <p className="text-[1.2rem] font-semibold text-black">
-                      {section.title}
-                    </p>
-                    <ul className="mt-2 m-0 list-none p-0 font-suisse lg:pointer-fine:mt-3.5 lg:pointer-fine:space-y-1.5">
-                      {section.links.map((link) => (
-                        <li key={link.label}>
-                          <Link
-                            href={link.href}
-                            {...(link.external
-                              ? { target: "_blank", rel: "noreferrer" }
-                              : {})}
-                            className="inline-flex min-h-11 items-center break-all text-[0.875rem] text-[#555555] transition-colors duration-200 hover:text-black lg:pointer-fine:min-h-0"
-                          >
-                            {link.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* ── 1. Top strip — empty gridline row ── */}
+      <div
+        aria-hidden="true"
+        className={`hidden h-14 shrink-0 grid-cols-1 border-[#121212]/15 border-t lg:grid ${FOOTER_COLS}`}
+      >
+        <div className="border-[#121212]/15 border-r" />
+        <div />
+        <div />
       </div>
 
-      {/* Bottom Bar: sticky, direct child of <footer>, sits above the nav grid */}
-      <div className="sticky bottom-0 z-20 border-t border-[#f0f0f0] bg-white">
-        <div className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-between gap-3 px-6 py-5 text-[0.8125rem] text-[#888888] sm:px-8">
-          <span>© {YEAR} PKM Consultants. All rights reserved.</span>
-          <span className="flex flex-wrap gap-x-6 gap-y-1">
-            <Link
-              href="/privacy"
-              className="inline-flex min-h-11 items-center transition-colors hover:text-black lg:pointer-fine:min-h-0"
+      {/* ── 2. Link blocks ── */}
+      <nav
+        aria-label="Footer"
+        className={`grid shrink-0 grid-cols-2 border-[#121212]/15 border-t ${FOOTER_COLS}`}
+      >
+        {FOOTER_BLOCKS.map((block, index) => (
+          <div
+            className={`flex min-w-0 flex-col justify-between gap-5 border-[#121212]/15 px-6 pt-4 pb-5 sm:gap-6 sm:px-8 sm:pt-5 sm:pb-6 lg:min-h-[clamp(240px,34svh,366px)] lg:gap-10 lg:px-6 lg:pt-8 lg:pb-8 ${BLOCK_BORDERS[index] ?? ""}`}
+            key={block.label}
+          >
+            {/* Block header: label + marker */}
+            <div className="flex items-center justify-between">
+              <span className="font-bold font-mosvita text-[#121212] text-[0.95rem] uppercase tracking-[0.04em] lg:text-[1.1rem]">
+                {block.label}
+              </span>
+              <span
+                aria-hidden="true"
+                className="inline-block size-2.5 shrink-0 bg-[#121212]"
+              />
+            </div>
+
+            {/* Links, pinned to the bottom of the block */}
+            <div
+              className={`grid gap-x-6 ${
+                block.columns.length > 1 ? "grid-cols-2" : "grid-cols-1"
+              }`}
             >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="inline-flex min-h-11 items-center transition-colors hover:text-black lg:pointer-fine:min-h-0"
-            >
-              Terms of Service
-            </Link>
+              {block.columns.map((column) => (
+                <ul
+                  className="m-0 flex min-w-0 list-none flex-col p-0"
+                  key={column[0]?.label}
+                >
+                  {column.map((link) => (
+                    <li key={link.label}>
+                      <FooterLink link={link} />
+                    </li>
+                  ))}
+                </ul>
+              ))}
+              {block.note ? (
+                <p className="m-0 mt-4 text-[#5b5a8a] text-[0.85rem] sm:text-[0.95rem] lg:mt-8 lg:text-[1rem]">
+                  {block.note}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* ── 3. Wordmark band ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none relative flex select-none items-center justify-center overflow-hidden border-[#121212]/15 border-t px-6 py-5 sm:px-8 sm:py-8 lg:min-h-0 lg:flex-1 lg:basis-0 lg:px-12 lg:py-[clamp(1.25rem,4svh,3rem)]"
+        ref={bandRef}
+      >
+        <span
+          className="block w-fit whitespace-nowrap text-[#261CC1] text-[16vw] uppercase tracking-[0.01em] will-change-transform"
+          ref={wordRef}
+          style={{ fontFamily: "'Pillar', 'Piller', sans-serif" }}
+        >
+          {/* Layout box = ink box (cap top → baseline) */}
+          <span
+            className="block"
+            style={{
+              lineHeight: WORDMARK_INK,
+              paddingTop: `${WORDMARK_OVERSHOOT}em`,
+              marginBottom: `${-WORDMARK_OVERSHOOT}em`,
+            }}
+          >
+            PKM Consultants
           </span>
-        </div>
+        </span>
+      </div>
+
+      {/* ── 4. Bottom row — aligned to the block columns ── */}
+      <div
+        className={`grid shrink-0 grid-cols-2 gap-x-6 gap-y-0 border-[#121212]/15 border-t px-6 py-2 font-mosvita text-[#121212] text-[0.75rem] uppercase tracking-[0.04em] sm:px-8 lg:gap-x-0 lg:px-0 lg:py-0 ${FOOTER_COLS}`}
+      >
+        <span className="col-span-2 flex min-h-11 items-center font-bold lg:col-span-1 lg:min-h-16 lg:px-6">
+          © {YEAR} PKM Consultants
+        </span>
+        <span className="flex items-center lg:px-6">
+          <Link
+            className="inline-flex min-h-11 items-center transition-colors hover:text-[#261CC1] lg:pointer-fine:min-h-0"
+            href="/terms"
+          >
+            Terms of Service
+          </Link>
+        </span>
+        <span className="flex items-center justify-between gap-6 lg:px-6">
+          <Link
+            className="inline-flex min-h-11 items-center transition-colors hover:text-[#261CC1] lg:pointer-fine:min-h-0"
+            href="/privacy"
+          >
+            Privacy Policy
+          </Link>
+          <span className="hidden text-[#5b5a8a] lg:inline">
+            13.0827° N · 80.2707° E
+          </span>
+        </span>
       </div>
     </footer>
   );
