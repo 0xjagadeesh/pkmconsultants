@@ -99,7 +99,9 @@ export default async function ProjectDetailPage({
           <h1 className="mt-2 font-bold text-4xl md:text-5xl">{title}</h1>
 
           {description && (
-            <p className="mt-5 max-w-2xl text-lg text-slate-400">{description}</p>
+            <p className="mt-5 max-w-2xl text-lg text-slate-400">
+              {description}
+            </p>
           )}
 
           {/* Meta pills */}

@@ -15,8 +15,6 @@ export interface ValuePillarItem {
   imageAlt: string;
 }
 
-
-
 const DEFAULT_PILLARS: ValuePillarItem[] = [
   {
     id: "coordinated-design",
@@ -62,11 +60,7 @@ interface ValuePillarsProps {
 
 export function ValuePillars({
   pretitle = "WHY US",
-  titleLines = [
-    "MEP design that",
-    "reduces rework,",
-    "cuts operating costs",
-  ],
+  titleLines = ["MEP design that", "reduces rework,", "cuts operating costs"],
   items = DEFAULT_PILLARS,
   defaultOpenIndex = 2, // "Certification" is open by default as shown in reference design
 }: ValuePillarsProps) {
@@ -115,7 +109,10 @@ export function ValuePillars({
             const isOpen = openIndex === index;
 
             return (
-              <div key={item.id} className="relative w-full transition-colors duration-200">
+              <div
+                key={item.id}
+                className="relative w-full transition-colors duration-200"
+              >
                 {/* Accordion Trigger Header */}
                 <button
                   type="button"
@@ -139,19 +136,22 @@ export function ValuePillars({
                     {/* Vertical Bar (shrinks/hides when open) */}
                     <span
                       className={`absolute w-[1.5px] h-4 bg-[#121212] group-hover:bg-[#261CC1] transition-all duration-300 ease-in-out ${
-                        isOpen ? "scale-y-0 opacity-0" : "scale-y-100 opacity-100"
+                        isOpen
+                          ? "scale-y-0 opacity-0"
+                          : "scale-y-100 opacity-100"
                       }`}
                     />
                   </span>
                 </button>
 
                 {/* Accordion Expandable Content */}
-                <div
+                <section
                   id={`value-pillar-content-${item.id}`}
-                  role="region"
                   aria-labelledby={`value-pillar-header-${item.id}`}
                   className={`grid transition-[grid-template-rows,opacity] duration-350 ease-in-out ${
-                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                    isOpen
+                      ? "grid-rows-[1fr] opacity-100"
+                      : "grid-rows-[0fr] opacity-0 pointer-events-none"
                   }`}
                 >
                   <div className="overflow-hidden">
@@ -178,14 +178,13 @@ export function ValuePillars({
                             alt={item.imageAlt}
                             fill
                             sizes="(min-width: 1024px) 215px, (min-width: 640px) 200px, 180px"
-                            className="object-cover transition-transform duration-700 ease-out hover:scale-105"
-                            unoptimized
+                            className="rounded-none object-cover transition-transform duration-700 ease-out hover:scale-105"
                           />
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </section>
               </div>
             );
           })}

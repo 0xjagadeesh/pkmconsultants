@@ -19,11 +19,17 @@ const NAV_LINKS = [
 
 const ALL_LINKS = [
   { name: "Home", href: "/" },
-  ...NAV_LINKS.map(l => ({ ...l, name: l.name.replace(",", "") })),
+  ...NAV_LINKS.map((l) => ({ ...l, name: l.name.replace(",", "") })),
 ];
 
 /* ── GSAP Animated Nav Link with dual-layer character stagger ── */
-function AnimatedNavLink({ link, isActive }: { link: { name: string, href: string; }, isActive: boolean; }) {
+function AnimatedNavLink({
+  link,
+  isActive,
+}: {
+  link: { name: string; href: string };
+  isActive: boolean;
+}) {
   const container = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
@@ -36,7 +42,10 @@ function AnimatedNavLink({ link, isActive }: { link: { name: string, href: strin
 
     const ctx = gsap.context(() => {
       // Single timeline for hover state
-      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.inOut", duration: 0.35 } });
+      const tl = gsap.timeline({
+        paused: true,
+        defaults: { ease: "power3.inOut", duration: 0.35 },
+      });
       tl.to(charsTop, { yPercent: -100, stagger: 0.02 }, 0);
       tl.to(charsBottom, { yPercent: 0, stagger: 0.02 }, 0);
 
@@ -63,16 +72,38 @@ function AnimatedNavLink({ link, isActive }: { link: { name: string, href: strin
       href={link.href}
       aria-label={link.name}
       className="relative flex no-underline overflow-hidden font-metropolis"
-      style={{ color: isActive ? "#261CC1" : "#0a0a0a", fontSize: "clamp(1.2rem, 2.2vw, 2.75rem)", fontWeight: 800, lineHeight: 1, letterSpacing: "-0.02em" }}
+      style={{
+        color: isActive ? "#261CC1" : "#0a0a0a",
+        fontSize: "clamp(1.2rem, 2.2vw, 2.75rem)",
+        fontWeight: 800,
+        lineHeight: 1,
+        letterSpacing: "-0.02em",
+      }}
     >
       <span className="flex" style={{ color: "inherit" }}>
         {link.name.split("").map((char, i) => (
-          <span key={i} className="char-top inline-block" style={{ whiteSpace: char === " " ? "pre" : undefined }}>{char}</span>
+          <span
+            key={i}
+            className="char-top inline-block"
+            style={{ whiteSpace: char === " " ? "pre" : undefined }}
+          >
+            {char}
+          </span>
         ))}
       </span>
-      <span className="flex absolute inset-0" aria-hidden="true" style={{ color: "#444444" }}>
+      <span
+        className="flex absolute inset-0"
+        aria-hidden="true"
+        style={{ color: "#444444" }}
+      >
         {link.name.split("").map((char, i) => (
-          <span key={i} className="char-bottom inline-block" style={{ whiteSpace: char === " " ? "pre" : undefined }}>{char}</span>
+          <span
+            key={i}
+            className="char-bottom inline-block"
+            style={{ whiteSpace: char === " " ? "pre" : undefined }}
+          >
+            {char}
+          </span>
         ))}
       </span>
     </Link>
@@ -84,25 +115,66 @@ function AnimatedNavLink({ link, isActive }: { link: { name: string, href: strin
 ════════════════════════════════════════════════════ */
 const LOGO_BIG = 400;
 const LOGO_SMALL = 100;
-const SHRINK_END = 0.5;  // 50vh
+const SHRINK_END = 0.5; // 50vh
 
 /* ── Inline SVG logo ── */
-function PkmLogo({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | null>; }) {
+function PkmLogo({
+  svgRef,
+}: {
+  svgRef: React.RefObject<SVGSVGElement | null>;
+}) {
   return (
     <svg
       ref={svgRef}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 1001.49 834.55"
       aria-label="PKM Consultants"
-      style={{ width: LOGO_BIG, maxWidth: "60vw", height: "auto", display: "block", overflow: "visible", flexShrink: 0, color: "#261CC1", transition: "none" }}
+      style={{
+        width: LOGO_BIG,
+        maxWidth: "60vw",
+        height: "auto",
+        display: "block",
+        overflow: "visible",
+        flexShrink: 0,
+        color: "#261CC1",
+        transition: "none",
+      }}
     >
-      <path fill="currentColor" d="M547.19,268.1c1-47.91-72.11-48.76-72.25-.85,0,46.85,71.19,47.6,72.25.85" transform="translate(-11.26 -94.72)" />
-      <path fill="currentColor" d="M533.38,171.19c1-29.69-44.44-30.53-44.55-.82,0,28.68,43.54,29.4,44.55.82" transform="translate(-11.26 -94.72)" />
-      <path fill="currentColor" d="M521,105.17c1.15-13.4-20-14.19-19.79-.73-.27,12.54,19.18,13.19,19.79.73" transform="translate(-11.26 -94.72)" />
-      <path fill="currentColor" d="M205.51,378.19c-277.3,194.63-27.95,470.12,305.56,461.38C843.65,848.2,1093.41,574.22,818,379.07l0-.15C956.84,440.63,1074,587,977.28,735.14c-177.84,258.91-752.85,258.79-930.54,0C-50.1,586.94,67.32,440.59,206.09,378.92" transform="translate(-11.26 -94.72)" />
-      <path fill="currentColor" d="M652.66,472.73c145.43,91.26,25.63,233-141.59,228.13-168.18,5-287.45-138.29-140.22-228.93l.13.12C126.49,562.43,264.77,776.37,511.12,767.68c245,8.62,384.57-203.66,141.85-295" transform="translate(-11.26 -94.72)" />
-      <path fill="currentColor" d="M585.78,475c49.73,55,1,138.58-74.71,136.28C433.75,613.8,385.5,526.7,438.7,472.51l.34.4c-32.19,11.48-64.46,32.75-76.71,66-13.51,36.51,6.94,72.64,37,93.53,61.38,43.08,159.46,43.95,221.79,2.34,30.55-20.23,52.28-55.71,39.87-92.75-11.24-33.49-42.82-55.45-74.6-67.6" transform="translate(-11.26 -94.72)" />
-      <path fill="currentColor" d="M251.76,757c-170.3-150.57-4-338.37,225.27-348.92l.17.12,34.81-59,35,59,.22,0c228.5,11.43,393.09,199.21,222.89,349l.31,0c277.15-164.43,52.86-422.8-259-413.58-311.27-9.17-536,248.31-259.9,413.1" transform="translate(-11.26 -94.72)" />
+      <path
+        fill="currentColor"
+        d="M547.19,268.1c1-47.91-72.11-48.76-72.25-.85,0,46.85,71.19,47.6,72.25.85"
+        transform="translate(-11.26 -94.72)"
+      />
+      <path
+        fill="currentColor"
+        d="M533.38,171.19c1-29.69-44.44-30.53-44.55-.82,0,28.68,43.54,29.4,44.55.82"
+        transform="translate(-11.26 -94.72)"
+      />
+      <path
+        fill="currentColor"
+        d="M521,105.17c1.15-13.4-20-14.19-19.79-.73-.27,12.54,19.18,13.19,19.79.73"
+        transform="translate(-11.26 -94.72)"
+      />
+      <path
+        fill="currentColor"
+        d="M205.51,378.19c-277.3,194.63-27.95,470.12,305.56,461.38C843.65,848.2,1093.41,574.22,818,379.07l0-.15C956.84,440.63,1074,587,977.28,735.14c-177.84,258.91-752.85,258.79-930.54,0C-50.1,586.94,67.32,440.59,206.09,378.92"
+        transform="translate(-11.26 -94.72)"
+      />
+      <path
+        fill="currentColor"
+        d="M652.66,472.73c145.43,91.26,25.63,233-141.59,228.13-168.18,5-287.45-138.29-140.22-228.93l.13.12C126.49,562.43,264.77,776.37,511.12,767.68c245,8.62,384.57-203.66,141.85-295"
+        transform="translate(-11.26 -94.72)"
+      />
+      <path
+        fill="currentColor"
+        d="M585.78,475c49.73,55,1,138.58-74.71,136.28C433.75,613.8,385.5,526.7,438.7,472.51l.34.4c-32.19,11.48-64.46,32.75-76.71,66-13.51,36.51,6.94,72.64,37,93.53,61.38,43.08,159.46,43.95,221.79,2.34,30.55-20.23,52.28-55.71,39.87-92.75-11.24-33.49-42.82-55.45-74.6-67.6"
+        transform="translate(-11.26 -94.72)"
+      />
+      <path
+        fill="currentColor"
+        d="M251.76,757c-170.3-150.57-4-338.37,225.27-348.92l.17.12,34.81-59,35,59,.22,0c228.5,11.43,393.09,199.21,222.89,349l.31,0c277.15-164.43,52.86-422.8-259-413.58-311.27-9.17-536,248.31-259.9,413.1"
+        transform="translate(-11.26 -94.72)"
+      />
     </svg>
   );
 }
@@ -134,9 +206,29 @@ function FullscreenMenu({
     if (open) {
       document.body.style.overflow = "hidden";
       gsap.set(overlay, { display: "flex" });
-      gsap.fromTo(overlay, { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.6, ease: "power4.inOut" });
-      gsap.fromTo(items, { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", stagger: 0.07, delay: 0.3 });
-      if (footer) gsap.fromTo(footer, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.55 });
+      gsap.fromTo(
+        overlay,
+        { clipPath: "inset(0 0 100% 0)" },
+        { clipPath: "inset(0 0 0% 0)", duration: 0.6, ease: "power4.inOut" }
+      );
+      gsap.fromTo(
+        items,
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.55,
+          ease: "power3.out",
+          stagger: 0.07,
+          delay: 0.3,
+        }
+      );
+      if (footer)
+        gsap.fromTo(
+          footer,
+          { y: 24, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.55 }
+        );
     } else {
       document.body.style.overflow = "";
       gsap.to(overlay, {
@@ -150,7 +242,9 @@ function FullscreenMenu({
 
   /* ESC key */
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
@@ -166,11 +260,16 @@ function FullscreenMenu({
         backgroundColor: "#1e1926",
         flexDirection: "column",
         clipPath: "inset(0 0 100% 0)",
-        padding: "2rem 2.5rem",
+        padding: "clamp(1rem, 4vw, 2rem) clamp(1.25rem, 6vw, 2.5rem)",
+        overflowY: "auto",
+        overscrollBehavior: "contain",
       }}
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between" style={{ height: "5rem" }}>
+      <div
+        className="flex items-center justify-between"
+        style={{ height: "5rem" }}
+      >
         <Link
           href="/"
           onClick={onClose}
@@ -181,9 +280,10 @@ function FullscreenMenu({
 
         {/* Two-line hamburger → becomes X */}
         <button
+          type="button"
           onClick={onClose}
           aria-label="Close menu"
-          className="relative flex flex-col justify-center items-end gap-[7px] w-10 h-10"
+          className="relative flex size-11 flex-col items-end justify-center gap-[7px]"
         >
           <span className="block h-[1.5px] w-6 bg-white transition-all duration-300 rotate-45 translate-y-[4.25px]" />
           <span className="block h-[1.5px] w-6 bg-white transition-all duration-300 -rotate-45 -translate-y-[4.25px]" />
@@ -193,19 +293,32 @@ function FullscreenMenu({
       {/* Nav links */}
       <ul
         ref={linksRef}
-        className="flex-1 flex flex-col justify-center gap-0 list-none p-0 m-0"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: "1.5rem" }}
+        className="flex-1 flex flex-col justify-center gap-0 list-none p-0 m-0 shrink-0"
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          marginTop: "1.5rem",
+        }}
       >
         {ALL_LINKS.map((link, i) => (
-          <li key={link.href} style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <li
+            key={link.href}
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          >
             <Link
               href={link.href}
               onClick={onClose}
               className="group flex items-center justify-between no-underline py-5 transition-colors duration-200"
-              style={{ color: isActive(link.href) ? "#261CC1" : "rgba(255,255,255,0.88)" }}
+              style={{
+                color: isActive(link.href)
+                  ? "#261CC1"
+                  : "rgba(255,255,255,0.88)",
+              }}
             >
               <div className="flex items-baseline gap-5">
-                <span className="text-white/20 font-light" style={{ fontSize: "0.7rem", letterSpacing: "0.12em" }}>
+                <span
+                  className="text-white/20 font-light"
+                  style={{ fontSize: "0.7rem", letterSpacing: "0.12em" }}
+                >
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span
@@ -216,11 +329,21 @@ function FullscreenMenu({
                 </span>
               </div>
               <svg
-                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                aria-hidden="true"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
                 className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 -rotate-45"
                 style={{ color: "#261CC1" }}
               >
-                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M5 12h14M12 5l7 7-7 7"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </Link>
           </li>
@@ -233,7 +356,10 @@ function FullscreenMenu({
         className="flex items-center justify-between pt-5 mt-4"
         style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
       >
-        <p className="text-white/25 tracking-[0.15em] uppercase" style={{ fontSize: "0.65rem" }}>
+        <p
+          className="text-white/25 tracking-[0.15em] uppercase"
+          style={{ fontSize: "0.65rem" }}
+        >
           © {new Date().getFullYear()} PKM Consultants
         </p>
         <Link
@@ -262,12 +388,19 @@ function HamburgerButton({
   const lineColor = isScrolled ? "#1e1926" : "#1e1926";
   return (
     <button
+      type="button"
       onClick={onClick}
       aria-label="Toggle menu"
-      className="flex flex-col justify-center items-end gap-[7px] w-10 h-10"
+      className="flex size-11 flex-col items-end justify-center gap-[7px]"
     >
-      <span className="block h-[1.5px] w-6 transition-colors duration-300" style={{ backgroundColor: lineColor }} />
-      <span className="block h-[1.5px] w-4 transition-colors duration-300" style={{ backgroundColor: lineColor }} />
+      <span
+        className="block h-[1.5px] w-6 transition-colors duration-300"
+        style={{ backgroundColor: lineColor }}
+      />
+      <span
+        className="block h-[1.5px] w-4 transition-colors duration-300"
+        style={{ backgroundColor: lineColor }}
+      />
     </button>
   );
 }
@@ -287,7 +420,9 @@ export function Navbar() {
   const isWhiteLogoRef = useRef(false);
 
   // Close menu on route change
-  useEffect(() => { setMenuOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -324,8 +459,13 @@ export function Navbar() {
     setScrolled(false);
     gsap.set(nav, {});
     const initialWidth = getBigSize(window.innerWidth);
-    if (svg) gsap.set(svg, { width: initialWidth, color: isWhiteLogoRef.current ? "#ffffff" : "#261CC1" });
-    if (linksNav) gsap.set(linksNav.querySelectorAll("a"), { color: "#0a0a0a" });
+    if (svg)
+      gsap.set(svg, {
+        width: initialWidth,
+        color: isWhiteLogoRef.current ? "#ffffff" : "#261CC1",
+      });
+    if (linksNav)
+      gsap.set(linksNav.querySelectorAll("a"), { color: "#0a0a0a" });
 
     /* static entrance (no animation) */
     gsap.set(nav, { opacity: 1, y: 0 });
@@ -335,7 +475,8 @@ export function Navbar() {
     let hidden = false;
     let snappedScrolled = false;
 
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * Math.min(Math.max(t, 0), 1);
+    const lerp = (a: number, b: number, t: number) =>
+      a + (b - a) * Math.min(Math.max(t, 0), 1);
 
     function update() {
       const scrollY = window.scrollY;
@@ -354,31 +495,52 @@ export function Navbar() {
       if (progress >= 1 && !snappedScrolled) {
         snappedScrolled = true;
         setScrolled(true);
-        if (svg && !isWhiteLogoRef.current) gsap.to(svg, { color: "#261CC1", duration: 0.25 });
-        if (linksNav) gsap.to(linksNav.querySelectorAll("a"), { color: "#333", duration: 0.25 });
+        if (svg && !isWhiteLogoRef.current)
+          gsap.to(svg, { color: "#261CC1", duration: 0.25 });
+        if (linksNav)
+          gsap.to(linksNav.querySelectorAll("a"), {
+            color: "#333",
+            duration: 0.25,
+          });
       }
       if (progress < 1 && snappedScrolled) {
         snappedScrolled = false;
         setScrolled(false);
-        if (svg && !isWhiteLogoRef.current) gsap.to(svg, { color: "#261CC1", duration: 0.25 });
-        if (linksNav) gsap.to(linksNav.querySelectorAll("a"), { color: "#0a0a0a", duration: 0.25 });
+        if (svg && !isWhiteLogoRef.current)
+          gsap.to(svg, { color: "#261CC1", duration: 0.25 });
+        if (linksNav)
+          gsap.to(linksNav.querySelectorAll("a"), {
+            color: "#0a0a0a",
+            duration: 0.25,
+          });
       }
 
       /* Hide/show on scroll direction */
       if (progress >= 1) {
         const dn = scrollY > lastScrollY + 6;
         const up = scrollY < lastScrollY - 2;
-        if (dn && !hidden) { gsap.to(nav!, { y: -150, duration: 0.35, ease: "power2.in" }); hidden = true; }
-        else if (up && hidden) { gsap.to(nav!, { y: 0, duration: 0.45, ease: "power3.out" }); hidden = false; }
+        if (dn && !hidden) {
+          gsap.to(nav!, { y: -150, duration: 0.35, ease: "power2.in" });
+          hidden = true;
+        } else if (up && hidden) {
+          gsap.to(nav!, { y: 0, duration: 0.45, ease: "power3.out" });
+          hidden = false;
+        }
       } else if (hidden) {
-        gsap.to(nav!, { y: 0, duration: 0.3, ease: "power2.out" }); hidden = false;
+        gsap.to(nav!, { y: 0, duration: 0.3, ease: "power2.out" });
+        hidden = false;
       }
 
       lastScrollY = scrollY;
       ticking = false;
     }
 
-    const onScroll = () => { if (!ticking) { requestAnimationFrame(update); ticking = true; } };
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
 
     /* MEPF Explode section detection — smoothly turn logo white over blue background */
@@ -387,8 +549,16 @@ export function Navbar() {
       const mepfSection = document.getElementById("mepf-explode");
       if (!mepfSection || mepfTrigger) return;
 
+      // Desktop: the whole 300vh track sits under a dark (sticky) left column.
+      // Below lg the section is stacked, so only the headline panel is dark.
+      const darkTarget =
+        window.innerWidth >= 1024
+          ? mepfSection
+          : (mepfSection.querySelector<HTMLElement>("[data-nav-dark]") ??
+            mepfSection);
+
       mepfTrigger = ScrollTrigger.create({
-        trigger: mepfSection,
+        trigger: darkTarget,
         start: "top 70px",
         end: "bottom 70px",
         onToggle: (self) => {
@@ -415,7 +585,8 @@ export function Navbar() {
     };
   }, [isHome]);
 
-  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <>
@@ -424,14 +595,11 @@ export function Navbar() {
         ref={navRef}
         id="pkm-navbar"
         className="fixed inset-x-0 top-0 z-50  will-change-transform overflow-visible"
-
       >
         {/*
           Desktop & Mobile: Flexbox layout
         */}
-        <div
-          className="flex justify-between items-center h-14 lg:h-28 px-5 lg:px-10"
-        >
+        <div className="flex justify-between items-center h-14 lg:h-28 px-5 lg:px-10">
           {/* LEFT — Logo */}
           <Link
             href="/"
@@ -446,8 +614,7 @@ export function Navbar() {
           <nav
             ref={linksNavRef}
             aria-label="Main navigation"
-            className="hidden lg:flex justify-end  items-center mb-3 flex-1"
-
+            className="hidden flex-1 items-center justify-end mb-3 lg:pointer-fine:flex"
           >
             {NAV_LINKS.map((link) => (
               <AnimatedNavLink
@@ -458,7 +625,7 @@ export function Navbar() {
             ))}
           </nav>
           {/* RIGHT — Hamburger */}
-          <div className="flex items-center justify-end shrink-0 w-[40px] lg:hidden">
+          <div className="flex w-11 shrink-0 items-center justify-end lg:pointer-fine:hidden">
             <HamburgerButton
               onClick={() => setMenuOpen(true)}
               isScrolled={isScrolled}

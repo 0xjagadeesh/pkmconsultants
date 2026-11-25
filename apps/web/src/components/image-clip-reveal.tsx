@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useEffect, CSSProperties } from "react";
+import Image from "next/image";
+import { useRef, useEffect, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MOTION_OK, REDUCED_MOTION } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -41,6 +43,8 @@ export interface ImageClipRevealProps {
   className?: string;
   /** Custom scroll trigger element or selector */
   trigger?: HTMLElement | string | null;
+  /** Responsive `sizes` for next/image (width of the container, not the viewport) */
+  sizes?: string;
 }
 
 export function ImageClipReveal({
@@ -67,6 +71,7 @@ export function ImageClipReveal({
   zoomFrom = 1.15,
   className = "",
   trigger,
+  sizes = "(min-width: 1024px) 45vw, 90vw",
 }: ImageClipRevealProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -90,7 +95,15 @@ export function ImageClipReveal({
     const yLbl = yLblRef.current;
     if (!wrap || !img || !clip) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia(wrap);
+
+    // Reduced motion: image fully revealed, no zoom, no tracking lines.
+    mm.add(REDUCED_MOTION, () => {
+      gsap.set(clip, { clipPath: "inset(0px 0% 0% 0px)" });
+      if (imgEl) gsap.set(imgEl, { scale: 1 });
+    });
+
+    mm.add(MOTION_OK, () => {
       const proxy = { p: 0 };
 
       gsap.to(proxy, {
@@ -112,8 +125,10 @@ export function ImageClipReveal({
           const edgeY = rect.top - wrRect.top + rect.height * p;
 
           // Max value is 90% of container size unless explicitly provided
-          const limitX = maxX !== undefined ? maxX : Math.round(wrRect.width * 0.9);
-          const limitY = maxY !== undefined ? maxY : Math.round(wrRect.height * 0.9);
+          const limitX =
+            maxX !== undefined ? maxX : Math.round(wrRect.width * 0.9);
+          const limitY =
+            maxY !== undefined ? maxY : Math.round(wrRect.height * 0.9);
 
           const valX = Math.round(p * limitX);
           const valY = Math.round(p * limitY);
@@ -141,7 +156,7 @@ export function ImageClipReveal({
           // 2. Y Label Alignment: Bottom-left relative to intersection
           if (yLbl) {
             yLbl.style.left = `${edgeX - 85}px`; // Shifted left so right side aligns with vertical line
-            yLbl.style.top = `${edgeY + 8}px`;   // Positioned cleanly below horizontal line
+            yLbl.style.top = `${edgeY + 8}px`; // Positioned cleanly below horizontal line
             yLbl.textContent = `Y: ${valY}`;
             yLbl.style.opacity = vis;
           }
@@ -161,19 +176,19 @@ export function ImageClipReveal({
       });
     });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, [maxX, maxY, scrub, triggerStart, triggerEnd, zoomFrom, trigger]);
 
   const containerStyle: CSSProperties = fill
     ? { position: "absolute", inset: 0, borderRadius, ...style }
     : {
-      position: "relative",
-      width,
-      height,
-      borderRadius,
-      ...(aspectRatio ? { aspectRatio } : {}),
-      ...style,
-    };
+        position: "relative",
+        width,
+        height,
+        borderRadius,
+        ...(aspectRatio ? { aspectRatio } : {}),
+        ...style,
+      };
 
   return (
     <div
@@ -197,18 +212,18 @@ export function ImageClipReveal({
           className="absolute inset-0 overflow-hidden rounded-none will-change-[clip-path]"
           style={{ clipPath: "inset(0px 100% 100% 0px)", borderRadius }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             ref={imgElRef}
             src={src}
             alt={alt}
-            className="w-full h-full object-cover will-change-transform rounded-none"
+            fill
+            sizes={sizes}
+            className="object-cover will-change-transform rounded-none"
             style={{
               transform: `scale(${zoomFrom})`,
               transformOrigin: "center center",
               borderRadius,
             }}
-            loading="lazy"
             draggable={false}
           />
         </div>

@@ -159,24 +159,44 @@ export default function ServicesPage() {
           <p className="mb-3 font-medium text-primary text-sm uppercase tracking-widest">
             How We Work
           </p>
-          <h2 className="font-bold text-3xl md:text-4xl">Our Engagement Model</h2>
+          <h2 className="font-bold text-3xl md:text-4xl">
+            Our Engagement Model
+          </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             A structured but flexible process that keeps you in control at every
             stage.
           </p>
           <div className="mt-14 grid gap-8 md:grid-cols-4">
             {[
-              { step: "01", title: "Discover", desc: "Deep-dive into your business, challenges, and goals." },
-              { step: "02", title: "Diagnose", desc: "Identify root causes and prioritise opportunities." },
-              { step: "03", title: "Design", desc: "Build a tailored strategy and implementation roadmap." },
-              { step: "04", title: "Deliver", desc: "Execute alongside your team and measure results." },
+              {
+                step: "01",
+                title: "Discover",
+                desc: "Deep-dive into your business, challenges, and goals.",
+              },
+              {
+                step: "02",
+                title: "Diagnose",
+                desc: "Identify root causes and prioritise opportunities.",
+              },
+              {
+                step: "03",
+                title: "Design",
+                desc: "Build a tailored strategy and implementation roadmap.",
+              },
+              {
+                step: "04",
+                title: "Deliver",
+                desc: "Execute alongside your team and measure results.",
+              },
             ].map((phase) => (
               <div key={phase.step} className="relative text-left">
                 <div className="mb-3 font-bold text-5xl text-primary/20">
                   {phase.step}
                 </div>
                 <h3 className="font-bold text-xl">{phase.title}</h3>
-                <p className="mt-2 text-muted-foreground text-sm">{phase.desc}</p>
+                <p className="mt-2 text-muted-foreground text-sm">
+                  {phase.desc}
+                </p>
               </div>
             ))}
           </div>

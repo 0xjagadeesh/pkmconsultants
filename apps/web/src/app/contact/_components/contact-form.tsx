@@ -42,7 +42,10 @@ export function ContactForm() {
       <form onSubmit={handleSubmit} className="mt-8 space-y-6" noValidate>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <label htmlFor="firstName" className="mb-2 block font-medium text-sm">
+            <label
+              htmlFor="firstName"
+              className="mb-2 block font-medium text-sm"
+            >
               First name <span className="text-red-500">*</span>
             </label>
             <input
@@ -55,7 +58,10 @@ export function ContactForm() {
             />
           </div>
           <div>
-            <label htmlFor="lastName" className="mb-2 block font-medium text-sm">
+            <label
+              htmlFor="lastName"
+              className="mb-2 block font-medium text-sm"
+            >
               Last name <span className="text-red-500">*</span>
             </label>
             <input

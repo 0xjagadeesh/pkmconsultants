@@ -35,14 +35,18 @@ export default async function ProjectsPage() {
       <section className="container mx-auto px-4 py-20">
         {!projects || projects.length === 0 ? (
           <div className="py-24 text-center text-muted-foreground">
-            <p className="text-lg">No projects published yet. Check back soon.</p>
+            <p className="text-lg">
+              No projects published yet. Check back soon.
+            </p>
           </div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => (
               <Link
                 key={project._id}
-                href={`/projects/${String(project.slug ?? "").split("/").pop()}`}
+                href={`/projects/${String(project.slug ?? "")
+                  .split("/")
+                  .pop()}`}
                 className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:-translate-y-1 hover:shadow-xl"
               >
                 {/* Image */}

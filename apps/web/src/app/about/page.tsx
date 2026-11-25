@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 // TODO: replace with the real team (or fetch from Sanity).
 // Members without an `image` render a blueprint-grid placeholder.
-const TEAM: { name: string; role: string; image?: string; }[] = [
+const TEAM: { name: string; role: string; image?: string }[] = [
   { name: "Full name", role: "Role" },
   { name: "Full name", role: "Role" },
   { name: "Full name", role: "Role" },
@@ -70,8 +70,7 @@ const PROCESS = [
   {
     number: "03",
     title: "Internal quality checks",
-    description:
-      "Each drawing set is reviewed internally before it is issued.",
+    description: "Each drawing set is reviewed internally before it is issued.",
   },
   {
     number: "04",
@@ -158,7 +157,10 @@ export default function AboutPage() {
           {/* 4. BOTTOM-RIGHT QUADRANT: Strategic Paragraph Description */}
           <div className="relative flex flex-col justify-center p-6 sm:p-8 lg:p-12 border-t border-white/20 lg:border-t-0 h-full overflow-hidden">
             <p className="m-0 text-white/90 text-[1rem] sm:text-[1.125rem] lg:text-[1.2rem] leading-[1.55] font-normal max-w-[540px]">
-              We deliver certainty through industrialized, digitized components that connect design, architecture, engineering, production, assembly and certification—ensuring measurable results in every project.
+              We deliver certainty through industrialized, digitized components
+              that connect design, architecture, engineering, production,
+              assembly and certification—ensuring measurable results in every
+              project.
             </p>
           </div>
         </div>
@@ -234,9 +236,9 @@ export default function AboutPage() {
             A team that works as a system
           </h2>
           <p className={`${BODY} max-w-[560px] lg:px-14`}>
-            Design only works when every discipline works in step. Our
-            engineers and designers share one workflow, one set of standards
-            and one review process.
+            Design only works when every discipline works in step. Our engineers
+            and designers share one workflow, one set of standards and one
+            review process.
           </p>
         </div>
         <ul className="m-0 grid list-none gap-px border-[#121212]/15 border-t bg-[#121212]/15 p-0 sm:grid-cols-2 lg:grid-cols-4">
@@ -283,16 +285,16 @@ export default function AboutPage() {
       <section className="border-[#121212]/15 border-b bg-[#f7fbff]">
         <div className="grid gap-6 px-5 pt-14 pb-10 lg:grid-cols-[35%_1fr] lg:gap-0 lg:px-0 lg:pt-20 lg:pb-14 xl:grid-cols-[480px_1fr]">
           <p className={`${LABEL} lg:px-10`}>Value</p>
-          <h2
-            className={`${H2} max-w-[22ch] lg:px-14`}
-            style={H2_SIZE}
-          >
+          <h2 className={`${H2} max-w-[22ch] lg:px-14`} style={H2_SIZE}>
             Guarantees that keep design on schedule, on budget and on code
           </h2>
         </div>
         <ul className="m-0 grid list-none gap-px border-[#121212]/15 border-t bg-[#121212]/15 p-0 lg:grid-cols-3">
           {VALUES.map((item) => (
-            <li className="flex flex-col gap-5 bg-[#f7fbff] p-5 lg:p-8" key={item.title}>
+            <li
+              className="flex flex-col gap-5 bg-[#f7fbff] p-5 lg:p-8"
+              key={item.title}
+            >
               <div className="relative aspect-square w-full overflow-hidden">
                 <Image
                   alt={item.alt}

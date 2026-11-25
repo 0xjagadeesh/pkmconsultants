@@ -12,4 +12,12 @@ import { settings } from "@/schemaTypes/documents/settings";
 
 export const singletons = [homePage, blogIndex, settings, footer, navbar];
 
-export const documents = [blog, project, page, faq, author, ...singletons, redirect];
+export const documents = [
+  blog,
+  project,
+  page,
+  faq,
+  author,
+  ...singletons,
+  redirect,
+];

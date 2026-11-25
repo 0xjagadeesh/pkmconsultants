@@ -1,23 +1,29 @@
 "use client";
 
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
-import Link from "next/link";
-import { Fragment } from "react";
-import { CursorTracker } from "@/components/cursor-tracker";
+import { Fragment, useEffect, useRef } from "react";
 import { ButtonZoomIn } from "@/components/buttonzoomin";
+import { CursorTracker } from "@/components/cursor-tracker";
 
-// Scroll "dwell" between cards. Lives in a spacer, NOT in a sticky card's margin.
-const SCROLL_GAP = "25vh";
+/* ── Stack tuning ──
+   Card N pins at N × (header strip height) from the top, so every earlier card
+   stays visible as a strip (index, image sliver, discipline label) above it.
+   Cards taller than the viewport (phones) pin by their bottom edge instead,
+   so their whole content is readable before the next card slides over. */
+const STACK_BOTTOM_GAP = 16;
 
 /* ── Solutions Content Data (MEPF Engineering Scope) ── */
 const STACK_ITEMS = [
   {
     order: "01",
     pretitle: "HVAC Design & Engineering",
-    title: "Right-sized cooling and ventilation, not over-designed, not under-delivering.",
+    title:
+      "Right-sized cooling and ventilation, not over-designed, not under-delivering.",
     description:
       "Oversized plant wastes capital and runs inefficiently. Undersized plant fails on the first hot day. We run room-by-room heat load calculations and select VRF or chilled water systems to match how your building will actually be used. Ductwork and equipment are coordinated against structure and ceiling heights before drawings are issued.",
-    benefit: "Lower running costs, better indoor air quality, and no ceiling clashes.",
+    benefit:
+      "Lower running costs, better indoor air quality, and no ceiling clashes.",
     systems: [
       "Heat Load Calculations",
       "VRF & Chilled Water Design",
@@ -28,14 +34,16 @@ const STACK_ITEMS = [
     image: "/images/hvac.webp",
     href: "/services",
   },
-  
+
   {
     order: "02",
     pretitle: "Plumbing & Public Health Engineering (PHE)",
-    title: "Efficient water supply and drainage that works on handover, not just on paper.",
+    title:
+      "Efficient water supply and drainage that works on handover, not just on paper.",
     description:
       "Plumbing is where late-stage clashes with structure and architecture are most expensive. We size systems to national codes and coordinate them with your team early, so shafts, slopes and levels are resolved before construction starts. Sustainable water management, including rainwater harvesting and STP/WTP integration, is part of the design from the start.",
-    benefit: "Clash-free execution, lower water use, and drainage that performs.",
+    benefit:
+      "Clash-free execution, lower water use, and drainage that performs.",
     systems: [
       "Domestic Water",
       "Sanitary Drainage",
@@ -49,10 +57,12 @@ const STACK_ITEMS = [
   {
     order: "03",
     pretitle: "Electrical Design: HT & LT Power Systems",
-    title: "Reliable power from grid to final circuit, ready for tomorrow's load.",
+    title:
+      "Reliable power from grid to final circuit, ready for tomorrow's load.",
     description:
       "Undersized panels and weak earthing cause downtime and failed inspections. Every design is backed by load calculations and short-circuit studies, so protection, cabling and capacity are right on day one and have headroom to grow.",
-    benefit: "Safe, compliant distribution and room for expansion without costly retrofits.",
+    benefit:
+      "Safe, compliant distribution and room for expansion without costly retrofits.",
     systems: [
       "HT & LT Panels",
       "Transformers & DG Sets",
@@ -66,10 +76,12 @@ const STACK_ITEMS = [
   {
     order: "04",
     pretitle: "Fire Protection Design",
-    title: "Life safety designed in from day one, with drawings built to clear approval.",
+    title:
+      "Life safety designed in from day one, with drawings built to clear approval.",
     description:
       "Fire approvals can stall a whole project. Our drawings follow the National Building Code (NBC), NFPA standards and local fire authority requirements, which shortens the statutory clearance process and protects your handover date.",
-    benefit: "Approval-ready drawings, fewer authority comments, and a safer building.",
+    benefit:
+      "Approval-ready drawings, fewer authority comments, and a safer building.",
     systems: [
       "Fire Hydrants",
       "Sprinklers & Wet Risers",
@@ -96,12 +108,56 @@ function SlantedDash() {
 }
 
 /* ── Re-export for backwards compatibility ── */
-export { ButtonZoomIn as DualRollButton, ButtonZoomIn } from "@/components/buttonzoomin";
+export {
+  ButtonZoomIn as DualRollButton,
+  ButtonZoomIn,
+} from "@/components/buttonzoomin";
 
 /* ═══════════════════════════════════════════════════════════════
    MAIN SOLUTIONS STACK SECTION
 ═══════════════════════════════════════════════════════════════ */
 export function SolutionsStack() {
+  const stackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const stack = stackRef.current;
+    if (!stack) return;
+    const cards = Array.from(
+      stack.querySelectorAll<HTMLElement>("[data-stack-card]")
+    );
+
+    let frame = 0;
+    const layout = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const viewport = window.innerHeight;
+        let offset = 0;
+        for (const card of cards) {
+          const fitsBelow = viewport - card.offsetHeight - STACK_BOTTOM_GAP;
+          card.style.setProperty(
+            "--stick-top",
+            `${Math.round(Math.min(offset, fitsBelow))}px`
+          );
+          // Next card pins just below this card's header strip (+1px top border)
+          const strip = card.querySelector<HTMLElement>("[data-stack-strip]");
+          offset += (strip?.offsetHeight ?? 0) + 1;
+        }
+        // Sticky offsets change the page geometry other ScrollTriggers depend on
+        ScrollTrigger.refresh();
+      });
+    };
+    layout();
+    const resizeObserver = new ResizeObserver(layout);
+    for (const card of cards) resizeObserver.observe(card);
+    window.addEventListener("resize", layout);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", layout);
+    };
+  }, []);
+
   return (
     <section className="relative w-full bg-[#f7fbff] text-[#121212] overflow-visible border-b border-[#121212]/15">
       {/* ── 1. SECTION HEADER ── */}
@@ -114,7 +170,10 @@ export function SolutionsStack() {
                 <span className="text-[0.75rem] lg:text-[0.8rem] font-bold tracking-[0.22em] uppercase font-metropolis text-[#121212]">
                   Systems
                 </span>
-                <span className="w-1.5 h-1.5 bg-[#121212] inline-block" aria-hidden="true" />
+                <span
+                  className="w-1.5 h-1.5 bg-[#121212] inline-block"
+                  aria-hidden="true"
+                />
               </div>
 
               <h2 className="font-extrabold font-metropolis tracking-[-0.035em] text-[#121212] text-[clamp(1.8rem,4.5vw,3.5rem)] leading-[1.06] mt-6 lg:mt-8 m-0 max-w-[650px]">
@@ -127,118 +186,111 @@ export function SolutionsStack() {
             </div>
           </div>
 
-          {/* Right Column: Interactive AutoCAD Cursor Tracker */}
-          <div className="relative p-0 flex items-stretch min-h-[260px] lg:min-h-[340px]">
+          {/* Right Column: Interactive AutoCAD Cursor Tracker (mouse only — hidden below lg, where it renders as an empty box) */}
+          <div className="relative hidden items-stretch p-0 lg:flex lg:min-h-[340px]">
             <CursorTracker />
           </div>
         </div>
       </div>
 
-      {/* ── 2. STACK CONTAINER (Sticky Cards Deck) ── */}
-      <div className="relative w-full pb-0">
-        <style>{`
-          .solution-card-0 { top: 56px !important; z-index: 10 !important; }
-          .solution-card-1 { top: 148px !important; z-index: 20 !important; }
-          .solution-card-2 { top: 240px !important; z-index: 30 !important; }
+      {/* ── 2. STACK CONTAINER (Pinned Cards Deck) ──
+          Every card is sticky inside this container and follows the previous one
+          directly, sliding over it. A short trailing spacer holds the last card in
+          place, then the whole deck releases with the end of the container. */}
+      <div className="relative w-full" ref={stackRef}>
+        {STACK_ITEMS.map((item, index) => (
+          <Fragment key={item.order}>
+            <article
+              aria-label={`${item.order} ${item.pretitle}`}
+              className="sticky w-full border-[#121212]/15 border-t bg-[#f7fbff]"
+              data-stack-card=""
+              id={`stack-${item.order}`}
+              style={{
+                top: "var(--stick-top, 0px)",
+                zIndex: 10 + index,
+              }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-[140px_minmax(0,1fr)] lg:grid-cols-[200px_360px_minmax(0,1fr)] xl:grid-cols-[240px_380px_minmax(0,1fr)] divide-y md:divide-y-0 md:divide-x divide-[#121212]/15">
+                {/* ── COLUMN 1: Order / Index ── */}
+                <div className="flex h-14 items-center justify-between gap-4 px-6 md:row-span-2 md:h-auto md:items-start md:justify-start lg:row-span-1 lg:px-10 xl:px-12">
+                  <div
+                    className="flex h-14 shrink-0 items-center font-bold font-metropolis text-[#121212] text-[1.15rem] tracking-tight lg:h-[76px] lg:text-[1.4rem]"
+                    data-stack-strip=""
+                  >
+                    <span>{item.order}</span>
+                    <SlantedDash />
+                  </div>
+                  {/* Mobile-only category tag next to index */}
+                  <span className="truncate text-right font-bold text-[#261CC1] text-[0.72rem] uppercase tracking-[0.16em] md:hidden">
+                    {item.pretitle}
+                  </span>
+                </div>
 
-          @media (min-width: 1024px) {
-            .solution-card-0 { top: 76px !important; }
-            .solution-card-1 { top: 172px !important; }
-            .solution-card-2 { top: 268px !important; }
-          }
-        `}</style>
+                {/* ── COLUMN 2: Image ── */}
+                <div className="flex items-start justify-center bg-[#f7fbff]/40 px-4 pt-3 pb-0 md:p-4 md:max-lg:border-r-0 lg:p-6">
+                  <div className="relative aspect-[3/1] w-full overflow-hidden border border-[#121212]/10 bg-white/40 md:aspect-[16/9] lg:aspect-[4/3]">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(min-width: 1280px) 340px, (min-width: 1024px) 310px, (min-width: 768px) calc(100vw - 172px), calc(100vw - 32px)"
+                      className="rounded-none object-cover transition-transform duration-700 ease-out hover:scale-105"
+                    />
+                  </div>
+                </div>
 
-        {STACK_ITEMS.map((item, index) => {
-          const isLast = index === STACK_ITEMS.length - 1;
-
-          return (
-            <Fragment key={item.order}>
-              <div
-                id={`stack-${item.order}`}
-                className={
-                  isLast
-                    ? "relative z-40 w-full bg-[#f7fbff] border-t border-b border-[#121212]/15 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] will-change-transform"
-                    : `solution-card-${index} sticky w-full bg-[#f7fbff] border-t border-b border-[#121212]/15 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] will-change-transform`
-                }
-              >
-                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] lg:grid-cols-[200px_360px_1fr] xl:grid-cols-[240px_380px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#121212]/15">
-                  {/* ── COLUMN 1: Order / Index ── */}
-                  <div className="px-6 py-4 lg:px-10 xl:px-12 lg:py-4 flex items-start justify-between md:justify-start">
-                    <div className="min-h-[72px] lg:min-h-[84px] flex items-center text-[1.15rem] lg:text-[1.4rem] font-bold font-metropolis tracking-tight text-[#121212]">
-                      <span>{item.order}</span>
-                      <SlantedDash />
-                    </div>
-                    {/* Mobile-only category tag next to index */}
-                    <span className="md:hidden text-[0.72rem] font-bold uppercase tracking-[0.16em] text-[#261CC1] self-center">
+                {/* ── COLUMN 3: Content & Action ── */}
+                <div className="flex flex-col justify-between px-6 pb-4 md:border-[#121212]/15 md:border-t md:pb-6 lg:min-h-[440px] lg:border-t-0 lg:px-10">
+                  <div>
+                    {/* ── HEADER STRIP (stays visible when the next card stacks on top) ── */}
+                    <div className="hidden items-center font-bold font-metropolis text-[#261CC1] text-[0.75rem] uppercase tracking-[0.18em] md:flex md:h-14 lg:h-[76px] lg:text-[0.8rem]">
                       {item.pretitle}
-                    </span>
-                  </div>
-
-                  {/* ── COLUMN 2: Image ── */}
-                  <div className="p-4 lg:p-6 flex items-start justify-center bg-[#f7fbff]/40">
-                    <div className="relative w-full aspect-[4/3] md:aspect-[3/4] lg:aspect-[4/3] max-h-[360px] overflow-hidden bg-white/40 border border-[#121212]/10">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        sizes="(min-width: 1280px) 380px, (min-width: 1024px) 360px, (min-width: 768px) 300px, 100vw"
-                        className="object-cover transition-transform duration-700 ease-out hover:scale-105"
-                        unoptimized
-                      />
                     </div>
-                  </div>
 
-                  {/* ── COLUMN 3: Content & Action ── */}
-                  <div className="px-6 py-4 lg:px-10 lg:py-4 flex flex-col justify-between min-h-[360px] lg:min-h-[440px]">
-                    <div>
-                      {/* ── TITLE HEADER (Only this part remains visible when card is stacked) ── */}
-                      <div className="min-h-[72px] lg:min-h-[84px] flex flex-col justify-center py-0.5">
-                        <div className="hidden md:block text-[0.7rem] lg:text-[0.75rem] font-bold tracking-[0.18em] uppercase text-[#261CC1] mb-1 font-metropolis">
-                          {item.pretitle}
+                    <div className="pt-3 md:pt-0">
+                      <h3 className="font-extrabold font-metropolis text-[1.02rem] md:text-[1.28rem] lg:text-[1.42rem] leading-[1.25] tracking-[-0.025em] text-[#121212] m-0 max-w-[720px]">
+                        {item.title}
+                      </h3>
+                    </div>
+
+                    {/* ── DESCRIPTION & DETAILS (100% hidden by next card when stacked) ── */}
+                    <div className="pt-2 md:pt-4 lg:pt-5">
+                      <p className="m-0 max-w-[680px] font-metropolis text-[#121212]/75 text-[0.86rem] leading-[1.55] max-md:line-clamp-2 md:text-[0.88rem] md:leading-[1.6] lg:text-[0.94rem]">
+                        {item.description}
+                      </p>
+
+                      {/* What you get callout */}
+                      <div className="mt-3 max-w-[680px] border-[#121212]/10 border-y border-r border-l-2 border-l-[#261CC1] bg-white/70 px-3 py-2.5 md:mt-4 md:p-3.5 lg:p-4">
+                        <div className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-[#261CC1] mb-1 font-metropolis">
+                          What you get
                         </div>
-
-                        <h3 className="font-extrabold font-metropolis text-[1.1rem] md:text-[1.28rem] lg:text-[1.42rem] leading-[1.25] tracking-[-0.025em] text-[#121212] m-0 max-w-[720px]">
-                          {item.title}
-                        </h3>
-                      </div>
-
-                      {/* ── DESCRIPTION & DETAILS (100% hidden by next card when stacked) ── */}
-                      <div className="pt-4 lg:pt-5">
-                        <p className="text-[0.88rem] lg:text-[0.94rem] leading-[1.6] text-[#121212]/75 max-w-[680px] font-metropolis m-0">
-                          {item.description}
+                        <p className="m-0 font-medium font-metropolis text-[#121212] text-[0.82rem] leading-[1.45] md:text-[0.85rem] md:leading-[1.5] lg:text-[0.9rem]">
+                          {item.benefit}
                         </p>
+                      </div>
 
-                        {/* What you get callout */}
-                        <div className="mt-4 p-3.5 lg:p-4 bg-white/70 border-l-2 border-[#261CC1] border-y border-r border-[#121212]/10 max-w-[680px]">
-                          <div className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-[#261CC1] mb-1 font-metropolis">
-                            What you get
-                          </div>
-                          <p className="text-[0.85rem] lg:text-[0.9rem] font-medium leading-[1.5] text-[#121212] m-0 font-metropolis">
-                            {item.benefit}
-                          </p>
-                        </div>
-
-                        {/* Systems for SEO only (accessible to crawlers, hidden from visual screen) */}
-                        <div className="sr-only" aria-hidden="false">
-                          <h4>Systems and Scope:</h4>
-                          <p>{item.systems.join(" · ")}</p>
-                        </div>
+                      {/* Systems for SEO only (accessible to crawlers, hidden from visual screen) */}
+                      <div className="sr-only" aria-hidden="false">
+                        <h4>Systems and Scope:</h4>
+                        <p>{item.systems.join(" · ")}</p>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Lower action */}
-                    <div className="pt-5 pb-2">
-                      <ButtonZoomIn href={item.href} label="Learn more" />
-                    </div>
+                  {/* Lower action */}
+                  <div className="pt-3 md:pt-5 md:pb-2">
+                    <ButtonZoomIn href={item.href} label="Learn more" />
                   </div>
                 </div>
               </div>
+            </article>
 
-              {/* Spacer between cards only. Nothing after card 04, so the section ends with it. */}
-              {!isLast && <div aria-hidden="true" style={{ height: SCROLL_GAP }} />}
-            </Fragment>
-          );
-        })}
+            {/* Hold the last card in place briefly before the deck releases */}
+            {index === STACK_ITEMS.length - 1 && (
+              <div aria-hidden="true" className="h-[15vh] lg:h-[20vh]" />
+            )}
+          </Fragment>
+        ))}
       </div>
 
       {/* ── 3. BOTTOM ARCHITECTURAL SEPARATOR ── */}

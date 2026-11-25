@@ -16,9 +16,7 @@ export function Providers({ children }: PropsWithChildren) {
         forcedTheme="light"
         disableTransitionOnChange
       >
-        <SmoothScroll>
-          {children}
-        </SmoothScroll>
+        <SmoothScroll>{children}</SmoothScroll>
       </NextThemesProvider>
     </QueryClientProvider>
   );

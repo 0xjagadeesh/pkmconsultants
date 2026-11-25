@@ -74,7 +74,9 @@ export function ButtonZoomIn({
   type = "button",
   disabled,
 }: ButtonZoomInProps) {
-  const containerRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
+  const containerRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(
+    null
+  );
   const bgOverlayRef = useRef<HTMLSpanElement>(null);
   const textTopRef = useRef<HTMLSpanElement>(null);
   const textBottomRef = useRef<HTMLSpanElement>(null);
@@ -84,9 +86,7 @@ export function ButtonZoomIn({
 
   // Normalize variant
   const isBlackVariant =
-    variant === "black" ||
-    variant === "dark" ||
-    variant === "ghost-black";
+    variant === "black" || variant === "dark" || variant === "ghost-black";
 
   // Explicit outline color from props, or fallback by variant
   const customOutline = outlineColor || borderColor;
@@ -135,7 +135,11 @@ export function ButtonZoomIn({
       tl.to(textBottomRef.current, { yPercent: 0 }, 0);
 
       // Button background fill transition
-      tl.to(bgOverlayRef.current, { backgroundColor: hoverBg, opacity: 1, duration: 0.18 }, 0);
+      tl.to(
+        bgOverlayRef.current,
+        { backgroundColor: hoverBg, opacity: 1, duration: 0.18 },
+        0
+      );
 
       // Outline and divider border sync (fast, snappy transition)
       tl.to(

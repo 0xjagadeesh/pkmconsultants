@@ -1,7 +1,8 @@
 "use client";
 
-import { ElementType, useEffect, useRef } from "react";
+import { type ElementType, useEffect, useRef } from "react";
 import gsap from "gsap";
+import { MOTION_OK } from "@/lib/motion";
 
 interface SplitWordRevealProps {
   text: string;
@@ -32,57 +33,58 @@ export function SplitWordReveal({
     const el = ref.current;
     if (!el) return;
 
-    const tops = Array.from(el.querySelectorAll<HTMLElement>(".swr-top"));
-    const bottoms = Array.from(el.querySelectorAll<HTMLElement>(".swr-bottom"));
-    const wraps = Array.from(el.querySelectorAll<HTMLElement>(".swr-wrap"));
+    // Reduced motion: no entrance or hover roll. Words render in place
+    // (the hover layer is hidden by its inline translateY).
+    const mm = gsap.matchMedia(el);
+    mm.add(MOTION_OK, () => {
+      const tops = Array.from(el.querySelectorAll<HTMLElement>(".swr-top"));
+      const bottoms = Array.from(
+        el.querySelectorAll<HTMLElement>(".swr-bottom")
+      );
+      const wraps = Array.from(el.querySelectorAll<HTMLElement>(".swr-wrap"));
 
-    // Clip both layers below their containers
-    gsap.set(tops, { yPercent: 110 });
-    gsap.set(bottoms, { yPercent: 110 });
+      // Clip both layers below their containers
+      gsap.set(tops, { yPercent: 110 });
+      gsap.set(bottoms, { yPercent: 110 });
 
-    // Mount reveal: top layers ALWAYS animate in
-    const mountTween = gsap.to(tops, {
-      yPercent: 0,
-      duration: 0.5,
-      ease: "power4.out",
-      stagger,
-      delay,
-    });
+      // Mount reveal: top layers animate in
+      gsap.to(tops, {
+        yPercent: 0,
+        duration: 0.5,
+        ease: "power4.out",
+        stagger,
+        delay,
+      });
 
-    const timelines: gsap.core.Timeline[] = [];
-    const listeners: { el: HTMLElement; enter: () => void; leave: () => void }[] = [];
+      if (!hover) return;
 
-    // Hover swap: only when hover={true}
-    if (hover) {
-      wraps.forEach((wrap) => {
-        const top = wrap.querySelector<HTMLElement>(".swr-top")!;
-        const bottom = wrap.querySelector<HTMLElement>(".swr-bottom")!;
-
+      // Hover swap
+      const listeners = wraps.flatMap((wrap) => {
+        const top = wrap.querySelector<HTMLElement>(".swr-top");
+        const bottom = wrap.querySelector<HTMLElement>(".swr-bottom");
+        if (!(top && bottom)) return [];
         const tl = gsap.timeline({
           paused: true,
           defaults: { ease: "power3.inOut", duration: 0.32 },
         });
         tl.to(top, { yPercent: -110 }, 0);
         tl.to(bottom, { yPercent: 0 }, 0);
-        timelines.push(tl);
-
         const enter = () => tl.play();
         const leave = () => tl.reverse();
         wrap.addEventListener("mouseenter", enter);
         wrap.addEventListener("mouseleave", leave);
-        listeners.push({ el: wrap, enter, leave });
+        return [{ wrap, enter, leave }];
       });
-    }
 
-    return () => {
-      mountTween.kill();
-      timelines.forEach((tl) => tl.kill());
-      listeners.forEach(({ el: wrap, enter, leave }) => {
-        wrap.removeEventListener("mouseenter", enter);
-        wrap.removeEventListener("mouseleave", leave);
-      });
-      gsap.killTweensOf([...tops, ...bottoms]);
-    };
+      return () => {
+        for (const { wrap, enter, leave } of listeners) {
+          wrap.removeEventListener("mouseenter", enter);
+          wrap.removeEventListener("mouseleave", leave);
+        }
+      };
+    });
+
+    return () => mm.revert();
   }, [stagger, delay, hover]);
 
   const words = text.split(" ");

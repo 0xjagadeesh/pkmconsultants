@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MOTION_OK } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,7 +15,7 @@ export interface ImageParallaxSectionProps {
   alt?: string;
   /** Optional container CSS classes */
   className?: string;
-  /** Parallax shift percentage (defaults to 18) */
+  /** Parallax shift, % of the over-sized image wrapper (defaults to 15, max ~16 to stay within the bleed) */
   speed?: number;
   /** Height of the section (defaults to 'h-[50vh] sm:h-[65vh] lg:h-[80vh]') */
   heightClass?: string;
@@ -22,10 +23,7 @@ export interface ImageParallaxSectionProps {
   priority?: boolean;
 }
 
-const DEFAULT_IMAGE =
-  "/images/metal-structure.jpg";
-const FALLBACK_REMOTE =
-  "https://cdn.sanity.io/images/unkmsg3i/production/3827ee5eca6ab5f64e987f515402c2a980bc61b6-1920x1080.jpg?w=1920&q=80&auto=format";
+const DEFAULT_IMAGE = "/images/metal-structure.jpg";
 
 /**
  * ImageParallaxSection
@@ -37,7 +35,7 @@ export function ImageParallaxSection({
   image = DEFAULT_IMAGE,
   alt = "Metal structure on a construction site",
   className = "",
-  speed = 18,
+  speed = 15,
   heightClass = "h-[50vh] sm:h-[65vh] lg:h-[80vh]",
   priority = false,
 }: ImageParallaxSectionProps) {
@@ -49,26 +47,27 @@ export function ImageParallaxSection({
     const imageWrapper = imageWrapperRef.current;
     if (!container || !imageWrapper) return;
 
-    // Smooth scrub parallax translation from -speed% to +speed%
-    const tween = gsap.fromTo(
-      imageWrapper,
-      { yPercent: -speed },
-      {
-        yPercent: speed,
-        ease: "none",
-        scrollTrigger: {
-          trigger: container,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
-        },
-      }
-    );
+    // Smooth scrub parallax translation from -speed% to +speed%.
+    // Reduced motion: the image stays centred and static.
+    const mm = gsap.matchMedia(container);
+    mm.add(MOTION_OK, () => {
+      gsap.fromTo(
+        imageWrapper,
+        { yPercent: -speed },
+        {
+          yPercent: speed,
+          ease: "none",
+          scrollTrigger: {
+            trigger: container,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        }
+      );
+    });
 
-    return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
-    };
+    return () => mm.revert();
   }, [speed]);
 
   const resolvedSrc = image || DEFAULT_IMAGE;
@@ -93,8 +92,7 @@ export function ImageParallaxSection({
           fill
           priority={priority}
           sizes="100vw"
-          className="object-cover object-center"
-          unoptimized
+          className="rounded-none object-cover object-center"
         />
       </div>
 

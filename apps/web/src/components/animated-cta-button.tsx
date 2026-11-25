@@ -12,14 +12,20 @@ interface AnimatedCTAButtonProps {
   style?: React.CSSProperties;
 }
 
-export function AnimatedCTAButton({ href, label, className, style }: AnimatedCTAButtonProps) {
+export function AnimatedCTAButton({
+  href,
+  label,
+  className,
+  style,
+}: AnimatedCTAButtonProps) {
   const containerRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const charsTop = containerRef.current.querySelectorAll(".cta-char-top");
-    const charsBottom = containerRef.current.querySelectorAll(".cta-char-bottom");
+    const charsBottom =
+      containerRef.current.querySelectorAll(".cta-char-bottom");
 
     // Bottom clone starts pushed down
     gsap.set(charsBottom, { yPercent: 100 });
@@ -50,12 +56,7 @@ export function AnimatedCTAButton({ href, label, className, style }: AnimatedCTA
   }, []);
 
   return (
-    <Link
-      ref={containerRef}
-      href={href}
-      className={className}
-      style={style}
-    >
+    <Link ref={containerRef} href={href} className={className} style={style}>
       {/* Text + icon row */}
       <span className="relative flex items-center gap-4 overflow-hidden">
         {/* Top layer (visible at rest) */}

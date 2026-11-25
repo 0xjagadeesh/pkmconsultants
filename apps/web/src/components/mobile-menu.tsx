@@ -43,7 +43,10 @@ export function StaticMobileMenu({ links }: { links: NavLink[] }) {
           </SheetClose>
         </SheetHeader>
 
-        <nav className="grid content-start gap-1 overflow-y-auto px-4 pt-4" aria-label="Mobile navigation">
+        <nav
+          className="grid content-start gap-1 overflow-y-auto px-4 pt-4"
+          aria-label="Mobile navigation"
+        >
           {links.map((link) => {
             const isActive =
               link.href === "/"

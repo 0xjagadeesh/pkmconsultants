@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useEffect, ElementType, CSSProperties } from "react";
+import { useRef, useEffect, type ElementType, type CSSProperties } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MOTION_OK, REDUCED_MOTION } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,7 +38,7 @@ export interface MaskRevealTextProps {
 
 /**
  * MaskRevealText / LineRevealText
- * 
+ *
  * Curtain block reveal:
  * 1. Black mask block starts from left 0 and grows to 100% width of the line.
  * 2. Background text appears underneath.
@@ -63,17 +64,21 @@ export function MaskRevealText({
   const maskRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   // Compute lines array from lines prop or text prop
-  const parsedLines = lines && lines.length > 0
-    ? lines
-    : text
-      ? text.split("\n")
-      : [];
+  const parsedLines =
+    lines && lines.length > 0 ? lines : text ? text.split("\n") : [];
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container || !parsedLines.length) return;
 
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia(container);
+
+    // Reduced motion: show the text immediately, no curtain.
+    mm.add(REDUCED_MOTION, () => {
+      gsap.set(textRefs.current.filter(Boolean), { opacity: 1 });
+    });
+
+    mm.add(MOTION_OK, () => {
       const tl = gsap.timeline({
         scrollTrigger: scrollTrigger
           ? {
@@ -132,9 +137,9 @@ export function MaskRevealText({
         // Clean exit: hide mask once it finishes shrinking away
         tl.set(maskEl, { opacity: 0 }, lineStart + duration);
       });
-    }, container);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, [
     parsedLines.length,
     duration,

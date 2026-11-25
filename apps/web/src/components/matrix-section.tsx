@@ -74,11 +74,12 @@ export function MatrixSection({
       ? title.split("\n")
       : [String(title)];
 
-  const isExternalLink = link?.startsWith("http://") || link?.startsWith("https://");
+  const isExternalLink =
+    link?.startsWith("http://") || link?.startsWith("https://");
 
   /* ── Content Column: Sticky narrative block ── */
   const ContentColumn = (
-    <div className="w-full h-full flex flex-col justify-start py-6 px-4">
+    <div className="flex h-full w-full flex-col justify-start px-6 py-12 sm:px-10 sm:py-14 lg:px-6 lg:py-6">
       <div className="max-w-[540px]">
         {/* Mask Title with one-time animation */}
         <MaskRevealText
@@ -116,7 +117,7 @@ export function MatrixSection({
 
   /* ── Image Column: Architectural ImageClipReveal with crosshairs (matching scroll-reveal-split gap) ── */
   const ImageColumn = (
-    <div className="relative w-full h-full min-h-[500px] sm:min-h-[600px] lg:min-h-[100svh] overflow-hidden bg-[#f7fbff]">
+    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#f7fbff] sm:aspect-[4/3] lg:aspect-auto lg:h-full lg:min-h-svh">
       <ImageClipReveal
         src={imageUrl || DEFAULT_IMAGE}
         alt={imageAlt || DEFAULT_ALT}
@@ -125,6 +126,7 @@ export function MatrixSection({
         scrub={1.2}
         triggerStart="top 80%"
         triggerEnd="top 15%"
+        sizes="(min-width: 1024px) 45vw, 90vw"
       />
     </div>
   );
@@ -133,7 +135,7 @@ export function MatrixSection({
     <section
       className={`matrix__section relative w-full ${bgClass} text-[#121212] border-b border-[#121212]/20 ${className}`}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 relative w-full min-h-[100svh]">
+      <div className="relative grid w-full grid-cols-1 lg:min-h-svh lg:grid-cols-2">
         {isImageLeft ? (
           <>
             {/* Left column: Image */}
@@ -141,9 +143,7 @@ export function MatrixSection({
               {ImageColumn}
             </div>
             {/* Right column: Content */}
-            <div className="w-full h-full">
-              {ContentColumn}
-            </div>
+            <div className="w-full h-full">{ContentColumn}</div>
           </>
         ) : (
           <>
@@ -152,9 +152,7 @@ export function MatrixSection({
               {ContentColumn}
             </div>
             {/* Right column: Image */}
-            <div className="w-full h-full">
-              {ImageColumn}
-            </div>
+            <div className="w-full h-full">{ImageColumn}</div>
           </>
         )}
       </div>

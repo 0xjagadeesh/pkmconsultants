@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MOTION_OK } from "@/lib/motion";
 import { ButtonZoomIn } from "./buttonzoomin";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -22,7 +22,7 @@ export function Prefooter({
   description = "Tell us about your commercial, industrial or high-rise project and we will advise on the right MEP design scope, from HVAC, electrical, plumbing and fire protection to NBC and NFPA compliance, based on your design goals, budget and timelines.",
   titleLine1 = "Start your project with",
   titleLine2 = "reliable MEP design",
-  buttonLabel = "Contact us",
+  buttonLabel = "Contact",
   buttonHref = "/contact",
   imageSrc = "/images/prefooter-copper.jpg",
 }: PrefooterProps) {
@@ -36,7 +36,9 @@ export function Prefooter({
     const parallaxEl = parallaxRef.current;
     if (!section) return;
 
-    const ctx = gsap.context(() => {
+    // Reduced motion: no parallax, title lines render in place.
+    const mm = gsap.matchMedia(section);
+    mm.add(MOTION_OK, () => {
       // Background parallax movement
       if (parallaxEl) {
         gsap.fromTo(
@@ -76,9 +78,9 @@ export function Prefooter({
           }
         );
       }
-    }, section);
+    });
 
-    return () => ctx.revert();
+    return () => mm.revert();
   }, []);
 
   return (
@@ -88,7 +90,10 @@ export function Prefooter({
     >
       {/* ── Parallax Background Image Layer ── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div ref={parallaxRef} className="relative w-full h-full will-change-transform">
+        <div
+          ref={parallaxRef}
+          className="relative w-full h-full will-change-transform"
+        >
           <Image
             src={imageSrc}
             alt="Architectural structure"
@@ -140,8 +145,8 @@ export function Prefooter({
               </h3>
               <div className="flex justify-left pt-4">
                 <ButtonZoomIn
-                  href="/contact"
-                  label="Contact"
+                  href={buttonHref}
+                  label={buttonLabel}
                   variant="white"
                   hoverBorderColor="rgba(255, 255, 255, 0.8)"
                 />

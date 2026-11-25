@@ -29,8 +29,13 @@ export function CursorTracker({
   const isSmallDot = (dotSize ?? (isMinimal ? "small" : "default")) === "small";
 
   const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
-  const [dragCurrent, setDragCurrent] = useState<{ x: number; y: number } | null>(null);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [dragCurrent, setDragCurrent] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Standard mouse hover coordinate animation (GSAP)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -115,7 +120,8 @@ export function CursorTracker({
   }, [isDragEnabled, dragStart]);
 
   // Determine selection box styling properties
-  const isDragging = isDragEnabled && dragStart !== null && dragCurrent !== null;
+  const isDragging =
+    isDragEnabled && dragStart !== null && dragCurrent !== null;
   const leftToRight = isDragging ? dragCurrent.x >= dragStart.x : true;
   const rectLeft = isDragging ? Math.min(dragStart.x, dragCurrent.x) : 0;
   const rectTop = isDragging ? Math.min(dragStart.y, dragCurrent.y) : 0;
@@ -124,6 +130,7 @@ export function CursorTracker({
 
   return (
     <div
+      aria-hidden="true"
       ref={containerRef}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -176,11 +183,19 @@ export function CursorTracker({
             width: rectWidth,
             height: rectHeight,
             borderColor: leftToRight
-              ? isDark ? "#38bdf8" : "#0055ff"
-              : isDark ? "#4ade80" : "#00b050",
+              ? isDark
+                ? "#38bdf8"
+                : "#0055ff"
+              : isDark
+                ? "#4ade80"
+                : "#00b050",
             backgroundColor: leftToRight
-              ? isDark ? "rgba(56, 189, 248, 0.2)" : "rgba(0, 85, 255, 0.12)"
-              : isDark ? "rgba(74, 222, 128, 0.2)" : "rgba(0, 176, 80, 0.12)",
+              ? isDark
+                ? "rgba(56, 189, 248, 0.2)"
+                : "rgba(0, 85, 255, 0.12)"
+              : isDark
+                ? "rgba(74, 222, 128, 0.2)"
+                : "rgba(0, 176, 80, 0.12)",
           }}
         />
       )}
@@ -190,14 +205,12 @@ export function CursorTracker({
         ref={dotRef}
         className={`absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 ${
           isSmallDot
-            ? `w-2 h-2 -ml-1 -mt-1 rounded-full ${
-                isDark
-                  ? "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.9)] ring-1 ring-white"
-                  : "bg-blue-600 ring-1 ring-white shadow-sm"
+            ? `w-2 h-2 -ml-1 -mt-1 ${
+                isDark ? "bg-white " : "bg-blue-600 ring-1 ring-white shadow-sm"
               }`
             : `w-4 h-4 -ml-[8px] -mt-[8px] ${
                 isDark
-                  ? "bg-white border-2 border-sky-400 shadow-md shadow-sky-500/30"
+                  ? "bg-white border-2 shadow-md shadow-sky-500/30"
                   : "bg-white border-2 border-black/40"
               }`
         }`}
@@ -229,6 +242,8 @@ export function CursorTracker({
   );
 }
 
-export function CursorTrackerMinimal(props: Omit<CursorTrackerProps, "variant">) {
+export function CursorTrackerMinimal(
+  props: Omit<CursorTrackerProps, "variant">
+) {
   return <CursorTracker {...props} variant="minimal" />;
 }

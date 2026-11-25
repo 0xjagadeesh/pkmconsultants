@@ -1,178 +1,120 @@
-import Link from "next/link";
+import { Logger } from "@workspace/logger";
 import { sanityFetch } from "@workspace/sanity/live";
-import {
-  queryBlogIndexPageBlogs,
-  queryAllProjects,
-} from "@workspace/sanity/query";
-import { SanityImage } from "@/components/elements/sanity-image";
-import { BlogCard } from "@/components/blog-card";
-import { CursorTracker } from "@/components/cursor-tracker";
+import { queryBlogIndexPageBlogs } from "@workspace/sanity/query";
+import type { Metadata } from "next";
 import { AnimatedCTAButton } from "@/components/animated-cta-button";
-import { SplitWordReveal } from "@/components/split-word-reveal";
 import { BuildingParallax } from "@/components/building-parallax";
+import { CursorTracker } from "@/components/cursor-tracker";
+import { HomeBlogSection } from "@/components/home-blog-section";
+import { ImageParallaxSection } from "@/components/image-parallax-section";
+import { MatrixSection } from "@/components/matrix-section";
 import { MepfExplode } from "@/components/mepf-explode";
+import { Prefooter } from "@/components/prefooter";
 import { ScrollRevealSplit } from "@/components/scroll-reveal-split";
 import { SolutionsStack } from "@/components/solutions-stack";
-import { ImageParallaxSection } from "@/components/image-parallax-section";
+import { SplitWordReveal } from "@/components/split-word-reveal";
 import { ValuePillars } from "@/components/value-pillars";
-import { MatrixSection } from "@/components/matrix-section";
-import { Prefooter } from "@/components/prefooter";
-import type { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "PKM Consultants — Strategic Business Consulting",
+  title: "PKM Consultants — MEPF Design & Engineering Consultancy, Chennai",
   description:
-    "PKM Consultants provides expert strategic, operational, and digital consulting services to help businesses grow and succeed.",
+    "PKM Consultants delivers HVAC, plumbing, electrical, fire protection and ELV design for commercial, industrial and high-rise buildings across India.",
 };
 
-const SERVICES = [
-  {
-    number: "01",
-    title: "Strategic Planning",
-    description:
-      "Long-term roadmaps and competitive analysis to help you reach your most ambitious goals.",
-    href: "/services",
-  },
-  {
-    number: "02",
-    title: "Digital Transformation",
-    description:
-      "Modernize your technology stack and workflows for the digital-first business landscape.",
-    href: "/services",
-  },
-  {
-    number: "03",
-    title: "Operational Excellence",
-    description:
-      "Streamline processes, reduce inefficiencies, and build a culture of continuous improvement.",
-    href: "/services",
-  },
-];
+const logger = new Logger("HomePage");
 
-const STATS = [
-  { value: "500+", label: "Clients Served" },
-  { value: "1.2k+", label: "Projects Completed" },
-  { value: "45%", label: "Avg. Revenue Growth" },
-  { value: "15+", label: "Years Experience" },
-];
+// Up to 4 posts: 1 column on phones, 2×2 on tablets, 3 or 4 across on desktop.
+const HOME_BLOG_COUNT = 4;
 
-// const TICKER_ITEMS = [
-//   "Strategic Planning",
-//   "Digital Transformation",
-//   "Operational Excellence",
-//   "Business Growth",
-//   "Leadership Advisory",
-//   "Market Expansion",
-// ];
+async function getLatestBlogs() {
+  try {
+    const { data } = await sanityFetch({
+      query: queryBlogIndexPageBlogs,
+      params: { start: 0, end: HOME_BLOG_COUNT },
+    });
+    return data ?? [];
+  } catch (error) {
+    // A CMS outage should not take the home page down; the section just hides.
+    logger.error("Failed to fetch latest blogs", error);
+    return [];
+  }
+}
 
 export default async function HomePage() {
-  const [blogsRes, projectsRes] = await Promise.all([
-    sanityFetch({ query: queryBlogIndexPageBlogs, params: { start: 0, end: 3 } }),
-    sanityFetch({ query: queryAllProjects }),
-  ]);
-
-  const blogs = blogsRes.data ?? [];
-  const projects = (projectsRes.data ?? []).slice(0, 3);
+  const blogs = await getLatestBlogs();
 
   return (
     <>
       {/* ══════════════════════════════════════════
-          HERO — CSS Grid layout
-          Row 1: logo overflow zone (clears the 600px SVG)
-          Row 2: eyebrow + headline (content)
-          Row 3: bottom strip (desc + CTAs)
+          HERO — 2×2 CSS Grid on desktop (lg+)
+          Cell borders draw the architectural crosshair:
+          ┌ eyebrow (logo zone) ┬ cursor tracker ┐  row 1: clears the big logo
+          │                     │                │  (320px at 1024w → 400px at 1440w+, tracking the logo's scroll-start size)
+          ├ mission statement   ┼ headline + CTA ┤  row 2: fills the rest
+          Below lg only the headline cell is shown, padded to clear the fixed logo
+          (logo is min(200px, 60vw) wide on phones, 300px on tablets; aspect ≈ 0.83).
       ══════════════════════════════════════════ */}
-      <section className="relative min-h-screen bg-[#f7fbff] text-[#1e1926] flex flex-col justify-between overflow-hidden">
-        {/* Spacer to clear fixed navbar */}
-
-
-        {/* Full screen spanning dividing lines */}
-        <div aria-hidden="true" className="hidden lg:block absolute left-0 right-0 border-b border-[1.2px] border-[#261CC1]/80" style={{ top: "400px" }} />
-        <div aria-hidden="true" className="hidden lg:block absolute top-0 bottom-0 border-r border-[1.2px] border-[#261CC1]/80 left-[35%] xl:left-[480px]" />
-
-        {/* Content: two rows stacked */}
-        <div className="flex flex-col flex-1 justify-center lg:justify-normal  pt-14 lg:pt-0">
-
-          {/* ── ROW 1 (above horizontal line) ── */}
-          <div className="hidden lg:flex">
-            {/* Row 1 Left: MEPF text */}
-            <div className="lg:w-[35%] xl:w-[480px] shrink-0 h-[400px] flex flex-col items-center justify-end min-h-[300px] px-10">
-              <div className="flex flex-row justify-between w-full">
-
-                <SplitWordReveal
-                  text="MEPF"
-                  as="p"
-                  className="text-[1rem] font-lumierepolist font-semibold tracking-[0.25em] uppercase text-[#261CC1] m-0"
-                  hoverColor="#1a1396"
-                  stagger={0.1}
-                  delay={0.2}
-                />
-                <SplitWordReveal
-                  text="Design Firm"
-                  as="p"
-                  className="text-[1rem] font-mosvita font-semibold tracking-[0.25em] uppercase text-[#261CC1] m-0"
-                  hoverColor="#1a1396"
-                  stagger={0.08}
-                  delay={0.35}
-                />
-              </div>
-
-
-            </div>
-
-            {/* Row 1 Right: Interactive Cursor Tracker Sandbox */}
-            <div className="flex-1 h-[400px] ">
-              <CursorTracker />
-            </div>
+      <section className="relative grid min-h-svh grid-cols-1 overflow-hidden bg-[#f7fbff] text-[#1e1926] lg:grid-cols-[35%_minmax(0,1fr)] lg:grid-rows-[clamp(320px,calc(19.25vw+123px),400px)_minmax(300px,1fr)] xl:grid-cols-[480px_minmax(0,1fr)]">
+        {/* Row 1 Left: eyebrow */}
+        <div className="hidden items-end border-[#261CC1]/80 lg:flex lg:border-r-[1.2px] lg:border-b-[1.2px] lg:px-10 lg:pb-3">
+          <div className="flex w-full flex-row flex-wrap justify-between gap-x-4 gap-y-1">
+            <SplitWordReveal
+              as="p"
+              className="m-0 font-lumierepolis font-semibold text-[#261CC1] text-[1rem] uppercase tracking-[0.25em]"
+              delay={0.2}
+              hoverColor="#1a1396"
+              stagger={0.1}
+              text="MEPF"
+            />
+            <SplitWordReveal
+              as="p"
+              className="m-0 font-mosvita font-semibold text-[#261CC1] text-[1rem] uppercase tracking-[0.25em]"
+              delay={0.35}
+              hoverColor="#1a1396"
+              stagger={0.08}
+              text="Design Firm"
+            />
           </div>
+        </div>
 
-          {/* ── ROW 2 (below horizontal line) ── */}
-          <div className="flex flex-col lg:flex-row justify-center lg:justify-start lg:items-stretch flex-1">
-            {/* Row 2 Left: Subtext + Description */}
-            <div className="hidden lg:flex lg:w-[35%] xl:w-[480px] shrink-0 lg:order-none pt-8 pb-6 pl-10 pr-6 flex-col justify-end lg:min-h-[300px]">
-              {/* Bottom: Paragraph */}
-              <SplitWordReveal
-                text="Designing sustainable, high-performance building systems that bridge the gap between stunning aesthetics and flawless functional reality."
-                as="p"
-                className="text-[#0f0f0f] text-[1.05rem] md:text-[1.15rem] leading-[1.55] max-w-[440px] m-0"
-                hoverColor="#444444"
-                stagger={0.04}
-                delay={0.5}
-              />
-            </div>
+        {/* Row 1 Right: interactive cursor tracker */}
+        <div className="hidden border-[#261CC1]/80 lg:block lg:border-b-[1.2px]">
+          <CursorTracker />
+        </div>
 
-            {/* Row 2 Right: Headline + CTA */}
-            <div className="lg:flex-1 order-1 lg:order-none bg-transparent lg:bg-[#261CC1] self-stretch pt-8 lg:pt-10 px-5 lg:pl-12 lg:pr-10 flex flex-col justify-end lg:justify-start items-end min-h-[55vh] lg:min-h-[300px] relative">
-              <div
-                aria-hidden="true"
-                className="hidden lg:block  pointer-events-none absolute inset-0 opacity-[0.1] group-hover:opacity-[0.18] transition-opacity duration-500"
-                style={{
-                  backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.8) 1px,transparent 1px)",
-                  backgroundSize: "10px 10px"
-                }}
-              />
-              <SplitWordReveal
-                text="A multi-disciplinary firm helping you bring your art to life."
-                as="h1"
+        {/* Row 2 Left: mission statement */}
+        <div className="hidden flex-col justify-end border-[#261CC1]/80 pt-8 pr-6 pb-6 pl-10 lg:flex lg:border-r-[1.2px]">
+          <SplitWordReveal
+            as="p"
+            className="m-0 max-w-[440px] text-[#0f0f0f] text-[1.05rem] leading-[1.55] md:text-[1.15rem]"
+            delay={0.5}
+            hoverColor="#444444"
+            stagger={0.04}
+            text="Designing sustainable, high-performance building systems that bridge the gap between stunning aesthetics and flawless functional reality."
+          />
+        </div>
 
-                className="font-extrabold font-metropolis text-[#1e1926] lg:text-[#f7fbff] leading-[1.08] tracking-[-0.035em] text-left lg:text-right m-0 mb-2 lg:mb-8 lg:ml-[clamp(3rem,12vw,400px)]"
-                style={{ fontSize: "clamp(2rem, 5.5vw, 3.2rem)" }}
-
-              />
-              {/* Subheadline — mobile only (left panel is hidden on mobile) */}
-              <p className="lg:hidden text-[#1e1926] text-[0.95rem] leading-[1.6] text-left w-full mb-8 m-0">
-                Designing sustainable, high-performance building systems that bridge the gap between stunning aesthetics and flawless functional reality.
-              </p>
-              <AnimatedCTAButton
-                href="/about"
-                label="About Us"
-                className="inline-flex self-start lg:self-end items-center bg-[#261CC1] justify-between lg:bg-[#f7fbff] text-[#f7fbff] lg:text-[#261CC1] px-5 py-3 font-bold text-[0.85rem] tracking-[0.08em] uppercase font-mosvita no-underline overflow-hidden"
-                style={{ minWidth: "120px" }}
-              />
-            </div>
-          </div>
-
+        {/* Row 2 Right: headline + CTA (the only cell below lg) */}
+        <div className="relative flex flex-col items-start justify-end px-6 pt-[calc(min(200px,60vw)*0.84+2rem)] pb-10 sm:px-10 md:pt-[calc(300px*0.84+2.5rem)] md:pb-14 lg:items-end lg:justify-start lg:bg-[#261CC1] lg:pt-10 lg:pr-10 lg:pb-10 lg:pl-12">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.8)_1px,transparent_1px)] bg-[length:10px_10px] opacity-[0.1] lg:block"
+          />
+          <SplitWordReveal
+            as="h1"
+            className="relative m-0 mb-4 max-w-[18ch] text-left font-extrabold font-metropolis text-[#1e1926] text-[clamp(2rem,5.5vw,3.2rem)] leading-[1.08] tracking-[-0.035em] md:max-w-[22ch] lg:mb-8 lg:ml-[clamp(3rem,12vw,400px)] lg:max-w-none lg:text-right lg:text-[#f7fbff]"
+            text="A multi-disciplinary firm helping you bring your art to life."
+          />
+          {/* Mission statement — below lg only (its desktop cell is hidden) */}
+          <p className="m-0 mb-8 w-full max-w-[560px] text-left text-[#1e1926] text-[0.95rem] leading-[1.6] sm:text-[1.05rem] lg:hidden">
+            Designing sustainable, high-performance building systems that bridge
+            the gap between stunning aesthetics and flawless functional reality.
+          </p>
+          <AnimatedCTAButton
+            className="relative inline-flex min-h-11 min-w-[120px] items-center justify-between self-start overflow-hidden bg-[#261CC1] px-5 py-3 font-bold font-mosvita text-[#f7fbff] text-[0.85rem] uppercase tracking-[0.08em] no-underline lg:self-end lg:bg-[#f7fbff] lg:text-[#261CC1]"
+            href="/about"
+            label="About Us"
+          />
         </div>
       </section>
 
@@ -181,27 +123,6 @@ export default async function HomePage() {
       ══════════════════════════════════════════ */}
       <BuildingParallax />
 
-     {/* ══════════════════════════════════════════
-          TICKER
-      ══════════════════════════════════════════ */}
-       {/* 
-      <div
-        aria-hidden="true"
-        className="bg-[#261CC1] py-3.5 overflow-hidden"
-      >
-        <div className="flex w-max animate-ticker hover:[animation-play-state:paused]">
-          {[...Array(2)].map((_, pass) =>
-            TICKER_ITEMS.map((item) => (
-              <span
-                key={`${pass}-${item}`}
-                className="whitespace-nowrap text-[0.68rem] font-bold tracking-[0.22em] uppercase text-white/90 px-10"
-              >
-                {item} ·
-              </span>
-            ))
-          )}
-        </div>
-      </div> */}
       {/* ══════════════════════════════════════════
           SCROLL REVEAL SPLIT — two-column image reveal
       ══════════════════════════════════════════ */}
@@ -231,10 +152,7 @@ export default async function HomePage() {
       <ValuePillars />
 
       <MatrixSection
-        title={[
-          "A consistent design",
-          "process on every project",
-        ]}
+        title={["A consistent design", "process on every project"]}
         description="Every project follows the same design workflow: load calculations, coordinated drawings, internal quality checks code compliance review. This keeps drawings consistent, makes revisions traceable, and lets us deliver commercial, industrial and high-rise projects to the same standard."
         link="/contact"
         linkLabel="Request a consultation"
@@ -255,6 +173,11 @@ export default async function HomePage() {
         imageAlt="High-rise commercial building with MEP services installed"
         imagePosition="right"
       />
+
+      {/* ══════════════════════════════════════════
+          LATEST BLOG POSTS — from Sanity (hidden when empty)
+      ══════════════════════════════════════════ */}
+      <HomeBlogSection blogs={blogs} />
 
       {/* ══════════════════════════════════════════
           PRE-FOOTER ARCHITECTURAL SECTION

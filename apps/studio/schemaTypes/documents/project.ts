@@ -27,7 +27,8 @@ export const project = defineType({
       title: "Project Title",
       description: "The name of the project",
       group: GROUP.MAIN_CONTENT,
-      validation: (Rule) => Rule.required().error("A project title is required"),
+      validation: (Rule) =>
+        Rule.required().error("A project title is required"),
     }),
     defineField({
       name: "category",

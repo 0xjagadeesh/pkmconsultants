@@ -16,7 +16,8 @@ export const metadata: Metadata = {
     default: "PKM Consultants",
     template: "%s | PKM Consultants",
   },
-  description: "PKM Consultants – professional consulting services.",
+  description:
+    "PKM Consultants – MEPF design and engineering consultancy based in Chennai, India.",
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
