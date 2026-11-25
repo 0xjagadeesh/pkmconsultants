@@ -1,18 +1,16 @@
 import { Logger } from "@workspace/logger";
 import { sanityFetch } from "@workspace/sanity/live";
+import { SANITY_BASE_URL } from "@workspace/sanity/image";
 import { queryAllProjects } from "@workspace/sanity/query";
 import type { Metadata } from "next";
-import { ImageBand } from "@/components/blocks/image-band";
 import { PageCta } from "@/components/blocks/page-cta";
-import { PageHero } from "@/components/blocks/page-hero";
-import { SplitFeature } from "@/components/blocks/split-feature";
 import {
   type ProjectRow,
   ProjectStack,
 } from "@/components/blocks/project-stack";
-import { StatsStrip } from "@/components/blocks/stats-strip";
 import {
   ALL_PROJECTS,
+  type DisciplineScope,
   PROJECT_CATEGORIES,
   PROJECT_SECTION_LABEL,
 } from "@/data/pkm-portfolio";
@@ -27,6 +25,39 @@ const logger = new Logger("ProjectsPage");
 
 const code = (index: number) => `P${String(index + 1).padStart(3, "0")}`;
 const cleanTitle = (title: string) => title.trim().replace(/\.$/, "");
+
+/**
+ * Portfolio entries have no project photos, so each row shows the drawing
+ * for its discipline. Alt text says so rather than implying a site photo.
+ */
+const DISCIPLINE_IMAGE: Record<DisciplineScope, { src: string; alt: string }> =
+  {
+    Plumbing: { src: "/images/plumbing.webp", alt: "Plumbing design drawing" },
+    "Fire Fighting": {
+      src: "/images/fps.webp",
+      alt: "Fire protection design drawing",
+    },
+    Electrical: { src: "/images/electrical.jpg", alt: "Electrical panels" },
+    "Plumbing & Fire Fighting": {
+      src: "/images/fps.webp",
+      alt: "Plumbing and fire fighting design drawing",
+    },
+    "Plumbing & Electrical": {
+      src: "/images/plumbing.webp",
+      alt: "Plumbing and electrical design drawing",
+    },
+    "Comprehensive MEP": {
+      src: "/images/archi.webp",
+      alt: "Coordinated MEP floor plan",
+    },
+    Other: { src: "/images/hvac.webp", alt: "MEP design drawing" },
+  };
+
+/** Square crop URL for a Sanity image asset id ("image-<hash>-WxH-ext"). */
+function sanityImageUrl(assetId: string) {
+  const file = assetId.replace(/^image-/, "").replace(/-(\w+)$/, ".$1");
+  return `${SANITY_BASE_URL}${file}?w=600&h=600&fit=crop&auto=format`;
+}
 
 async function getSanityProjects() {
   try {
@@ -48,6 +79,7 @@ const PORTFOLIO_ROWS: ProjectRow[] = ALL_PROJECTS.map((project, i) => ({
   location: project.location,
   year: project.yearFrom,
   role: PROJECT_SECTION_LABEL[project.section],
+  image: DISCIPLINE_IMAGE[project.disciplineScope],
   consultant:
     project.mepConsultant.toUpperCase() === "PKM CONSULTANTS"
       ? undefined
@@ -67,6 +99,12 @@ export default async function ProjectsPage() {
     location: project.client ?? undefined,
     year: project.completedYear,
     href: project.slug ? `/projects/${project.slug}` : undefined,
+    image: project.image?.id
+      ? {
+          src: sanityImageUrl(project.image.id),
+          alt: project.title ?? "Project",
+        }
+      : undefined,
   }));
 
   const rows =
@@ -85,55 +123,13 @@ export default async function ProjectsPage() {
     ...new Set(caseStudies.map((row) => row.category)),
   ].filter((c, i, all) => all.indexOf(c) === i);
 
-  const stats = [
-    { label: "Projects", value: String(rows.length) },
-    {
-      label: "PKM design",
-      value: String(
-        ALL_PROJECTS.filter((p) => p.section === "pkm_designed").length
-      ),
-    },
-    {
-      label: "Design review",
-      value: String(
-        ALL_PROJECTS.filter((p) => p.section === "review_consultancy").length
-      ),
-    },
-    {
-      label: "Metro & transit",
-      value: String(
-        ALL_PROJECTS.filter((p) => p.category === "Metro & Transit").length
-      ),
-    },
-  ];
-
   return (
     <>
-      <PageHero
-        eyebrow="Projects"
-        intro="MEPF design, design review and site support on residential, commercial, metro, industrial and institutional buildings across India."
-        title={["The method,", "applied to real buildings"]}
-      />
-
-      <ProjectStack categories={categories} projects={rows} />
-
-      <StatsStrip items={stats} />
-
-      <ImageBand
-        alt="Building under construction"
-        src="/images/building-1.jpg"
-      />
-
-      <SplitFeature
-        description="Every project follows the same design workflow: load calculations, coordinated drawings, internal quality checks and code compliance review. That is what keeps drawings consistent across sectors and scales."
-        image={{
-          src: "/images/hvac.webp",
-          alt: "Coordinated HVAC layout drawing",
-        }}
-        imageSide="left"
-        label="Method"
-        link={{ href: "/services", label: "How we work" }}
-        title="One consistent process on every project"
+      <ProjectStack
+        categories={categories}
+        projects={rows}
+        subtitle="The method, applied to real buildings."
+        title="Projects"
       />
 
       <PageCta />
