@@ -8,6 +8,8 @@ import { VisualEditing } from "next-sanity/visual-editing";
 import { Footer } from "@/components/footer";
 import { CombinedJsonLd } from "@/components/json-ld";
 import { Navbar } from "@/components/navbar";
+import { NoImageDrag } from "@/components/no-image-drag";
+import { PageTransition } from "@/components/page-transition";
 import { PreviewBar } from "@/components/preview-bar";
 import { Providers } from "@/components/providers";
 
@@ -83,6 +85,8 @@ export default async function RootLayout({
           <Navbar />
           {children}
           <Footer />
+          <PageTransition />
+          <NoImageDrag />
           <SanityLive />
           <CombinedJsonLd includeOrganization includeWebsite />
           {(await draftMode()).isEnabled && (

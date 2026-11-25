@@ -358,6 +358,46 @@ a:hover .nav-link__label span {
     height: auto;
     object-fit: cover;
     border-radius: var(--radius-md);
+    /* Images can't be dragged out of the page (Chromium / WebKit) */
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   PAGE TRANSITION — first-load "clap" panels
+   Pure CSS so the intro always opens, even before/without JS.
+══════════════════════════════════════════════════════ */
+@keyframes pkm-clap-up {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+
+@keyframes pkm-clap-down {
+  to {
+    transform: translateY(100%);
+    visibility: hidden;
+  }
+}
+
+@keyframes pkm-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes pkm-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.55);
+    opacity: 0.5;
   }
 }
 

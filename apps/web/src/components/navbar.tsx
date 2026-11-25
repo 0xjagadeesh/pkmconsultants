@@ -71,9 +71,9 @@ function AnimatedNavLink({
       ref={container}
       href={link.href}
       aria-label={link.name}
-      className="relative flex no-underline overflow-hidden font-metropolis"
+      className="relative flex no-underline overflow-hidden font-metropolis transition-[color] duration-300"
       style={{
-        color: isActive ? "#261CC1" : "#0a0a0a",
+        color: isActive ? "var(--nav-active)" : "var(--nav-fg)",
         fontSize: "clamp(1.2rem, 2.2vw, 2.75rem)",
         fontWeight: 800,
         lineHeight: 1,
@@ -94,7 +94,7 @@ function AnimatedNavLink({
       <span
         className="flex absolute inset-0"
         aria-hidden="true"
-        style={{ color: "#444444" }}
+        style={{ color: "var(--nav-fg-alt)" }}
       >
         {link.name.split("").map((char, i) => (
           <span
@@ -136,8 +136,9 @@ function PkmLogo({
         display: "block",
         overflow: "visible",
         flexShrink: 0,
-        color: "#261CC1",
-        transition: "none",
+        color: "var(--nav-logo)",
+        // Width is scrubbed by scroll (no transition); colour eases on tone change
+        transition: "color 0.3s ease",
       }}
     >
       <path
@@ -378,14 +379,8 @@ function FullscreenMenu({
 /* ════════════════════════════════════════════════════
    TWO-LINE HAMBURGER BUTTON
 ════════════════════════════════════════════════════ */
-function HamburgerButton({
-  onClick,
-  isScrolled,
-}: {
-  onClick: () => void;
-  isScrolled: boolean;
-}) {
-  const lineColor = isScrolled ? "#1e1926" : "#1e1926";
+function HamburgerButton({ onClick }: { onClick: () => void }) {
+  const lineColor = "var(--nav-fg)";
   return (
     <button
       type="button"
@@ -408,37 +403,71 @@ function HamburgerButton({
 /* ════════════════════════════════════════════════════
    NAVBAR
 ════════════════════════════════════════════════════ */
+type NavTone = "light" | "dark" | "brand";
+
+/** Colour sets for the bar: dark text on light sections, light on dark. */
+const NAV_TONE_VARS: Record<NavTone, Record<string, string>> = {
+  light: {
+    "--nav-fg": "#0a0a0a",
+    "--nav-fg-alt": "#444444",
+    "--nav-active": "#261CC1",
+    "--nav-logo": "#261CC1",
+  },
+  // Black / obsidian backgrounds: active page in a bright brand blue
+  dark: {
+    "--nav-fg": "#f7fbff",
+    "--nav-fg-alt": "#dedcff",
+    "--nav-active": "#7b73ff",
+    "--nav-logo": "#f7fbff",
+  },
+  // Brand-blue backgrounds: blue would vanish, so the active page is lavender
+  brand: {
+    "--nav-fg": "#f7fbff",
+    "--nav-fg-alt": "#dedcff",
+    "--nav-active": "#dedcff",
+    "--nav-logo": "#f7fbff",
+  },
+};
+
+/** Strongly blue surface (e.g. #261CC1) rather than black / grey. */
+const isBlueSurface = (r: number, g: number, b: number) =>
+  b - Math.max(r, g) > 80;
+
+/** Inner pages: hide the bar once the user has scrolled this far (px). */
+const HIDE_AFTER = 80;
+
+const luminance = (r: number, g: number, b: number) =>
+  (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+function parseRgba(value: string): [number, number, number, number] | null {
+  const match = value.match(/rgba?\(([^)]+)\)/);
+  if (!match?.[1]) return null;
+  const [r = 0, g = 0, b = 0, a = 1] = match[1]
+    .split(/[\s,/]+/)
+    .filter(Boolean)
+    .map(Number);
+  return [r, g, b, a];
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const linksNavRef = useRef<HTMLElement>(null);
   const isHome = pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setScrolled] = useState(false);
-
-  const isWhiteLogoRef = useRef(false);
+  const [tone, setTone] = useState<NavTone>("light");
 
   // Close menu on route change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: route change trigger
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
+  /* ── 1. Logo size + hide on scroll down / show on scroll up (all pages) ── */
   useEffect(() => {
     const nav = navRef.current;
     const svg = svgRef.current;
-    const linksNav = linksNavRef.current;
     if (!nav) return;
-
-    /* NON-HOME — compact white bar */
-    if (!isHome) {
-      setScrolled(true);
-      gsap.set(nav, {});
-      const initialWidth = window.innerWidth < 1024 ? 80 : LOGO_SMALL;
-      if (svg) gsap.set(svg, { width: initialWidth, color: "#261CC1" });
-      if (linksNav) gsap.set(linksNav.querySelectorAll("a"), { color: "#333" });
-      return;
-    }
 
     const getBigSize = (width: number) => {
       if (width < 768) return 200; // Mobile starts at 200px
@@ -449,85 +478,63 @@ export function Navbar() {
       }
       return LOGO_BIG;
     };
-
-    const getSmallSize = (width: number) => {
-      if (width < 1024) return 80; // Mobile & Tablet shrink to 80px
-      return LOGO_SMALL; // Desktop shrinks to 100px
-    };
-
-    /* HOME — light-glass hero bar for white background */
-    setScrolled(false);
-    gsap.set(nav, {});
-    const initialWidth = getBigSize(window.innerWidth);
-    if (svg)
-      gsap.set(svg, {
-        width: initialWidth,
-        color: isWhiteLogoRef.current ? "#ffffff" : "#261CC1",
-      });
-    if (linksNav)
-      gsap.set(linksNav.querySelectorAll("a"), { color: "#0a0a0a" });
-
-    /* static entrance (no animation) */
-    gsap.set(nav, { opacity: 1, y: 0 });
-
-    let lastScrollY = 0;
-    let ticking = false;
-    let hidden = false;
-    let snappedScrolled = false;
-
+    const getSmallSize = (width: number) => (width < 1024 ? 80 : LOGO_SMALL);
     const lerp = (a: number, b: number, t: number) =>
       a + (b - a) * Math.min(Math.max(t, 0), 1);
 
+    gsap.set(nav, { y: 0 });
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    let hidden = false;
+
     function update() {
+      if (!nav) return;
       const scrollY = window.scrollY;
-      const isMobile = window.innerWidth < 1024;
-      const shrinkEnd = isMobile ? 0.3 : SHRINK_END;
-      const maxScroll = window.innerHeight * shrinkEnd;
-      const progress = Math.min(Math.max(scrollY / maxScroll, 0), 1);
+      const width = window.innerWidth;
 
-      const bigSize = getBigSize(window.innerWidth);
-      const smallSize = getSmallSize(window.innerWidth);
-
-      /* Scrub logo width dynamically based on screen width */
-      if (svg) svg.style.width = `${lerp(bigSize, smallSize, progress)}px`;
-
-      /* Snap state at progress=1 */
-      if (progress >= 1 && !snappedScrolled) {
-        snappedScrolled = true;
-        setScrolled(true);
-        if (svg && !isWhiteLogoRef.current)
-          gsap.to(svg, { color: "#261CC1", duration: 0.25 });
-        if (linksNav)
-          gsap.to(linksNav.querySelectorAll("a"), {
-            color: "#333",
-            duration: 0.25,
-          });
-      }
-      if (progress < 1 && snappedScrolled) {
-        snappedScrolled = false;
-        setScrolled(false);
-        if (svg && !isWhiteLogoRef.current)
-          gsap.to(svg, { color: "#261CC1", duration: 0.25 });
-        if (linksNav)
-          gsap.to(linksNav.querySelectorAll("a"), {
-            color: "#0a0a0a",
-            duration: 0.25,
-          });
+      // Home: logo shrinks from big to small over the first part of the hero
+      let canHide = scrollY > HIDE_AFTER;
+      if (isHome) {
+        const shrinkEnd = width < 1024 ? 0.3 : SHRINK_END;
+        const progress = Math.min(
+          Math.max(scrollY / (window.innerHeight * shrinkEnd), 0),
+          1
+        );
+        if (svg) {
+          svg.style.width = `${lerp(getBigSize(width), getSmallSize(width), progress)}px`;
+        }
+        canHide = progress >= 1;
+      } else if (svg) {
+        svg.style.width = `${getSmallSize(width)}px`;
       }
 
-      /* Hide/show on scroll direction */
-      if (progress >= 1) {
-        const dn = scrollY > lastScrollY + 6;
+      if (canHide) {
+        const down = scrollY > lastScrollY + 6;
         const up = scrollY < lastScrollY - 2;
-        if (dn && !hidden) {
-          gsap.to(nav!, { y: -150, duration: 0.35, ease: "power2.in" });
+        if (down && !hidden) {
+          gsap.to(nav, {
+            y: -150,
+            duration: 0.35,
+            ease: "power2.in",
+            overwrite: true,
+          });
           hidden = true;
         } else if (up && hidden) {
-          gsap.to(nav!, { y: 0, duration: 0.45, ease: "power3.out" });
+          gsap.to(nav, {
+            y: 0,
+            duration: 0.45,
+            ease: "power3.out",
+            overwrite: true,
+          });
           hidden = false;
         }
       } else if (hidden) {
-        gsap.to(nav!, { y: 0, duration: 0.3, ease: "power2.out" });
+        gsap.to(nav, {
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out",
+          overwrite: true,
+        });
         hidden = false;
       }
 
@@ -541,49 +548,100 @@ export function Navbar() {
         ticking = true;
       }
     };
+
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      gsap.killTweensOf(nav);
+    };
+  }, [isHome]);
 
-    /* MEPF Explode section detection — smoothly turn logo white over blue background */
-    let mepfTrigger: ScrollTrigger | null = null;
-    const initMepfTrigger = () => {
-      const mepfSection = document.getElementById("mepf-explode");
-      if (!mepfSection || mepfTrigger) return;
+  /* ── 2. Tone: light text over dark sections (incl. the transition layer) ── */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-probe on route change
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
 
-      // Desktop: the whole 300vh track sits under a dark (sticky) left column.
-      // Below lg the section is stacked, so only the headline panel is dark.
-      const darkTarget =
-        window.innerWidth >= 1024
-          ? mepfSection
-          : (mepfSection.querySelector<HTMLElement>("[data-nav-dark]") ??
-            mepfSection);
+    const imageTone = new Map<string, NavTone>();
+    const canvas = document.createElement("canvas");
+    canvas.width = 8;
+    canvas.height = 8;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-      mepfTrigger = ScrollTrigger.create({
-        trigger: darkTarget,
-        start: "top 70px",
-        end: "bottom 70px",
-        onToggle: (self) => {
-          isWhiteLogoRef.current = self.isActive;
-          if (svg) {
-            gsap.to(svg, {
-              color: self.isActive ? "#ffffff" : "#261CC1",
-              duration: 0.35,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          }
-        },
+    /** Average brightness of a photo (cached per src). */
+    const toneOfImage = (img: HTMLImageElement): NavTone => {
+      const key = img.currentSrc || img.src;
+      const cached = imageTone.get(key);
+      if (cached) return cached;
+      if (!(img.complete && img.naturalWidth && ctx)) return "dark";
+      let result: NavTone = "dark";
+      try {
+        ctx.drawImage(img, 0, 0, 8, 8);
+        const { data } = ctx.getImageData(0, 0, 8, 8);
+        let total = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          total += luminance(data[i] ?? 0, data[i + 1] ?? 0, data[i + 2] ?? 0);
+        }
+        result = total / (data.length / 4) < 0.55 ? "dark" : "light";
+      } catch {
+        // Cross-origin image without CORS headers: assume a photo, i.e. dark
+      }
+      imageTone.set(key, result);
+      return result;
+    };
+
+    /** Walk up from the element under the bar to the first opaque surface. */
+    const toneAt = (x: number, y: number): NavTone => {
+      const top = document
+        .elementsFromPoint(x, y)
+        .find((el) => !nav.contains(el));
+      let node: Element | null = top ?? null;
+      while (node && node !== document.documentElement) {
+        const explicit = (node as HTMLElement).dataset?.navTone;
+        if (
+          explicit === "dark" ||
+          explicit === "light" ||
+          explicit === "brand"
+        ) {
+          return explicit;
+        }
+        if (node instanceof HTMLImageElement) return toneOfImage(node);
+        const rgba = parseRgba(getComputedStyle(node).backgroundColor);
+        if (rgba && rgba[3] >= 0.5) {
+          const [r, g, b] = rgba;
+          if (luminance(r, g, b) >= 0.5) return "light";
+          return isBlueSurface(r, g, b) ? "brand" : "dark";
+        }
+        node = node.parentElement;
+      }
+      return "light";
+    };
+
+    let frame = 0;
+    const probe = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        // Sample where the links / hamburger sit (right side, mid-bar)
+        const next = toneAt(window.innerWidth * 0.75, 30);
+        setTone((current) => (current === next ? current : next));
       });
     };
 
-    initMepfTrigger();
-    const timer = setTimeout(initMepfTrigger, 120);
-
+    probe();
+    // Interval catches changes without scrolling: transitions, menus, images
+    const interval = window.setInterval(probe, 200);
+    window.addEventListener("scroll", probe, { passive: true });
+    window.addEventListener("resize", probe);
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener("scroll", onScroll);
-      if (mepfTrigger) mepfTrigger.kill();
+      cancelAnimationFrame(frame);
+      window.clearInterval(interval);
+      window.removeEventListener("scroll", probe);
+      window.removeEventListener("resize", probe);
     };
-  }, [isHome]);
+  }, [pathname]);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -592,9 +650,11 @@ export function Navbar() {
     <>
       {/* ── HEADER ── */}
       <nav
-        ref={navRef}
+        className="fixed inset-x-0 top-0 z-50 overflow-visible will-change-transform"
+        data-tone={tone}
         id="pkm-navbar"
-        className="fixed inset-x-0 top-0 z-50  will-change-transform overflow-visible"
+        ref={navRef}
+        style={NAV_TONE_VARS[tone] as React.CSSProperties}
       >
         {/*
           Desktop & Mobile: Flexbox layout
@@ -612,7 +672,6 @@ export function Navbar() {
 
           {/* CENTER — Nav links */}
           <nav
-            ref={linksNavRef}
             aria-label="Main navigation"
             className="hidden flex-1 items-center justify-end mb-3 lg:pointer-fine:flex"
           >
@@ -626,10 +685,7 @@ export function Navbar() {
           </nav>
           {/* RIGHT — Hamburger */}
           <div className="flex w-11 shrink-0 items-center justify-end lg:pointer-fine:hidden">
-            <HamburgerButton
-              onClick={() => setMenuOpen(true)}
-              isScrolled={isScrolled}
-            />
+            <HamburgerButton onClick={() => setMenuOpen(true)} />
           </div>
         </div>
       </nav>
