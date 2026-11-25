@@ -3,10 +3,12 @@ import { client } from "@workspace/sanity/client";
 import { sanityFetch } from "@workspace/sanity/live";
 import { queryProjectBySlug, queryProjectPaths } from "@workspace/sanity/query";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Calendar, Tag, User } from "lucide-react";
+import { LineButton } from "@/components/blocks/line-button";
 import { SanityImage } from "@/components/elements/sanity-image";
 import { RichText } from "@/components/elements/rich-text";
+import { type HeroMeta, PageHero } from "@/components/blocks/page-hero";
+import { PageCta } from "@/components/blocks/page-cta";
+import { SectionLabel } from "@/components/blocks/section-label";
 import type { Metadata } from "next";
 
 const logger = new Logger("ProjectSlug");
@@ -46,9 +48,8 @@ export async function generateMetadata({
     params: { slug: `/projects/${slug}` },
   });
   return {
-    title: data?.title
-      ? `${data.title} | PKM Consultants`
-      : "Project | PKM Consultants",
+    // The root layout's title template appends "| PKM Consultants"
+    title: data?.title ?? "Project",
     description: data?.description ?? "",
   };
 }
@@ -77,117 +78,70 @@ export default async function ProjectDetailPage({
     richText,
   } = project;
 
+  const meta: HeroMeta[] = [
+    { label: "Type", value: category ?? "MEPF design" },
+    { label: "Year", value: completedYear ? String(completedYear) : "—" },
+    { label: "Client", value: clientName ?? "—" },
+    {
+      label: "Scope",
+      value: tags && tags.length > 0 ? tags.join(", ") : "MEPF design",
+    },
+  ];
+
   return (
-    <main className="min-h-screen pb-24">
-      {/* Hero */}
-      <section className="bg-slate-950 pb-16 pt-12 text-white">
-        <div className="container mx-auto px-4">
-          <Link
-            href="/projects"
-            className="mb-8 inline-flex items-center gap-2 text-slate-400 text-sm transition-colors hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Projects
-          </Link>
+    <>
+      <PageHero
+        eyebrow="Project"
+        intro={description ?? undefined}
+        meta={meta}
+        title={title ?? "Project"}
+      />
 
-          {category && (
-            <span className="mb-4 inline-block rounded-full bg-primary/20 px-3 py-1 font-medium text-primary text-xs uppercase tracking-widest">
-              {category}
-            </span>
-          )}
+      {image?.id ? (
+        <div className="relative aspect-[16/9] w-full overflow-hidden border-[#121212]/15 border-b bg-[#f7fbff] sm:aspect-[21/9]">
+          <SanityImage
+            alt={
+              image.alt && image.alt !== "untitled"
+                ? image.alt
+                : (title ?? "Project image")
+            }
+            className="absolute inset-0 h-full w-full rounded-none object-cover"
+            height={900}
+            image={image}
+            loading="eager"
+            mode="cover"
+            sizes="100vw"
+            width={2100}
+          />
+        </div>
+      ) : null}
 
-          <h1 className="mt-2 font-bold text-4xl md:text-5xl">{title}</h1>
-
-          {description && (
-            <p className="mt-5 max-w-2xl text-lg text-slate-400">
-              {description}
-            </p>
-          )}
-
-          {/* Meta pills */}
-          <div className="mt-8 flex flex-wrap gap-4">
-            {clientName && (
-              <div className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-slate-300">
-                <User className="h-4 w-4 text-primary" />
-                {clientName}
+      <section className="border-[#121212]/15 border-b bg-[#f7fbff] text-[#121212]">
+        <div className="grid grid-cols-1 lg:grid-cols-[35%_minmax(0,1fr)] xl:grid-cols-[480px_minmax(0,1fr)]">
+          <div className="border-[#121212]/15 lg:border-r">
+            <div className="flex flex-col gap-8 px-6 pt-12 pb-6 sm:px-10 lg:sticky lg:top-24 lg:px-10 lg:py-16">
+              <SectionLabel>About the project</SectionLabel>
+              <div className="hidden lg:block">
+                <LineButton href="/projects" label="All projects" />
               </div>
-            )}
-            {completedYear && (
-              <div className="flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-slate-300">
-                <Calendar className="h-4 w-4 text-primary" />
-                {completedYear}
-              </div>
-            )}
+            </div>
           </div>
+          <article className="max-w-[760px] px-6 pb-14 sm:px-10 lg:px-12 lg:py-16">
+            {richText && richText.length > 0 ? (
+              <RichText richText={richText} />
+            ) : (
+              <p className="m-0 text-[#555555] text-[1.05rem] leading-[1.7]">
+                A detailed write-up for this project is coming soon.
+              </p>
+            )}
+            <div className="mt-12 lg:hidden">
+              <LineButton href="/projects" label="All projects" />
+            </div>
+          </article>
         </div>
       </section>
 
-      {/* Cover image — overlaps hero */}
-      {image?.id && (
-        <div className="container mx-auto px-4">
-          <div className="-mt-8 overflow-hidden rounded-2xl shadow-2xl">
-            <SanityImage
-              image={image}
-              alt={title ?? "Project image"}
-              className="h-auto max-h-[500px] w-full object-cover"
-              width={1200}
-              height={600}
-              loading="eager"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Body */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_280px]">
-          <article>
-            {richText ? (
-              <RichText richText={richText} />
-            ) : (
-              <p className="text-muted-foreground">
-                No detailed write-up available yet for this project.
-              </p>
-            )}
-          </article>
-
-          {/* Sidebar */}
-          <aside className="space-y-8">
-            {tags && tags.length > 0 && (
-              <div className="rounded-2xl border p-6">
-                <div className="mb-4 flex items-center gap-2 font-semibold text-sm">
-                  <Tag className="h-4 w-4 text-primary" />
-                  Tags
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-primary/10 px-3 py-1 text-primary text-sm"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="rounded-2xl border bg-slate-50 p-6 dark:bg-slate-900">
-              <p className="font-semibold text-sm">Start a similar project?</p>
-              <p className="mt-2 text-muted-foreground text-sm">
-                Let's talk about how we can help your business achieve similar
-                results.
-              </p>
-              <Link
-                href="/contact"
-                className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
-              >
-                Get in touch
-              </Link>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </main>
+      <PageCta />
+    </>
   );
 }

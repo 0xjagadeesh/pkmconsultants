@@ -31,7 +31,7 @@ function ImagePlaceholder() {
   );
 }
 
-function HomeBlogCard({ blog }: { blog: Blog }) {
+export function HomeBlogCard({ blog }: { blog: Blog }) {
   const { title, description, slug, image, publishedAt } = blog;
   const date = formatDate(publishedAt);
   const heading = title?.trim() || "Untitled article";

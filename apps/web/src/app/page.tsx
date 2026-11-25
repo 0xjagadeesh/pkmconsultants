@@ -156,7 +156,7 @@ export default async function HomePage() {
         description="Every project follows the same design workflow: load calculations, coordinated drawings, internal quality checks code compliance review. This keeps drawings consistent, makes revisions traceable, and lets us deliver commercial, industrial and high-rise projects to the same standard."
         link="/contact"
         linkLabel="Request a consultation"
-        imageUrl="/images/mep-design-process.webp"
+        imageUrl="/images/archi.webp"
         imageAlt="MEP engineer reviewing coordinated HVAC, electrical and plumbing drawings"
         imagePosition="left"
       />
@@ -169,7 +169,7 @@ export default async function HomePage() {
         description="Our MEP and fire protection designs are delivered on commercial, industrial and high-rise buildings across India, from concept design to approval-ready drawings and site support."
         link="/projects"
         linkLabel="View our projects"
-        imageUrl="/images/mep-project-experience.webp"
+        imageUrl="/images/building-1.jpg"
         imageAlt="High-rise commercial building with MEP services installed"
         imagePosition="right"
       />

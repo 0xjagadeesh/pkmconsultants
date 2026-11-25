@@ -8,6 +8,10 @@ import { RichText } from "@/components/elements/rich-text";
 import { SanityImage } from "@/components/elements/sanity-image";
 import { TableOfContent } from "@/components/elements/table-of-content";
 import { ArticleJsonLd } from "@/components/json-ld";
+import { type HeroMeta, PageHero } from "@/components/blocks/page-hero";
+import { PageCta } from "@/components/blocks/page-cta";
+import { SectionLabel } from "@/components/blocks/section-label";
+import { LineButton } from "@/components/blocks/line-button";
 import { getSEOMetadata } from "@/lib/seo";
 
 const logger = new Logger("BlogSlug");
@@ -83,38 +87,75 @@ export default async function BlogSlugPage({
   if (!data) {
     return notFound();
   }
-  const { title, description, image, richText } = data ?? {};
+  const { title, description, image, richText, publishedAt, authors } =
+    data ?? {};
+
+  const published = publishedAt
+    ? new Intl.DateTimeFormat("en-IN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(new Date(publishedAt))
+    : null;
+
+  const meta: HeroMeta[] = [
+    ...(published ? [{ label: "Published", value: published }] : []),
+    ...(authors?.name ? [{ label: "Author", value: authors.name }] : []),
+    ...(authors?.position ? [{ label: "Role", value: authors.position }] : []),
+  ];
 
   return (
-    <div className="container mx-auto my-16 px-4 md:px-6">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
-        <main>
-          <ArticleJsonLd article={data} />
-          <header className="mb-8">
-            <h1 className="mt-2 font-bold text-4xl">{title}</h1>
-            <p className="mt-4 text-lg text-muted-foreground">{description}</p>
-          </header>
-          {image && (
-            <div className="mb-12">
-              <SanityImage
-                alt={title}
-                className="h-auto w-full rounded-lg"
-                height={900}
-                image={image}
-                loading="eager"
-                width={1600}
-              />
-            </div>
-          )}
-          <RichText richText={richText} />
-        </main>
+    <>
+      <ArticleJsonLd article={data} />
+      <PageHero
+        eyebrow="Blog"
+        intro={description ?? undefined}
+        meta={meta.length > 0 ? meta : undefined}
+        title={title ?? "Article"}
+      />
 
-        <div className="hidden lg:block">
-          <div className="sticky top-4 rounded-lg">
-            <TableOfContent richText={richText ?? []} />
-          </div>
+      {image?.id ? (
+        <div className="relative aspect-[16/9] w-full overflow-hidden border-[#121212]/15 border-b bg-[#f7fbff] sm:aspect-[21/9]">
+          <SanityImage
+            alt={
+              image.alt && image.alt !== "untitled"
+                ? image.alt
+                : (title ?? "Article image")
+            }
+            className="absolute inset-0 h-full w-full rounded-none object-cover"
+            height={900}
+            image={image}
+            loading="eager"
+            mode="cover"
+            sizes="100vw"
+            width={2100}
+          />
         </div>
-      </div>
-    </div>
+      ) : null}
+
+      <section className="border-[#121212]/15 border-b bg-[#f7fbff] text-[#121212]">
+        <div className="grid grid-cols-1 lg:grid-cols-[35%_minmax(0,1fr)] xl:grid-cols-[480px_minmax(0,1fr)]">
+          <aside className="border-[#121212]/15 lg:border-r">
+            <div className="flex flex-col gap-8 px-6 pt-12 pb-2 sm:px-10 lg:sticky lg:top-24 lg:px-10 lg:py-16">
+              <SectionLabel>In this article</SectionLabel>
+              <div className="hidden lg:block">
+                <TableOfContent richText={richText ?? []} />
+              </div>
+              <div className="hidden lg:block">
+                <LineButton href="/blog" label="All articles" />
+              </div>
+            </div>
+          </aside>
+          <article className="max-w-[760px] px-6 pb-14 sm:px-10 lg:px-12 lg:py-16">
+            <RichText richText={richText} />
+            <div className="mt-12 lg:hidden">
+              <LineButton href="/blog" label="All articles" />
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <PageCta />
+    </>
   );
 }

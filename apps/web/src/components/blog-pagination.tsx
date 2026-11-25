@@ -89,6 +89,7 @@ export function BlogPagination({
             <PaginationItem>
               <PaginationPrevious
                 aria-label={`Go to page ${currentPage - 1}`}
+                className="min-h-11 rounded-none"
                 href={getPageUrl(currentPage - 1)}
                 size="default"
               />
@@ -104,6 +105,7 @@ export function BlogPagination({
               ) : (
                 <PaginationLink
                   aria-label={`Go to page ${item}`}
+                  className="inline-flex size-11 items-center justify-center rounded-none border border-[#121212]/15 font-bold font-mosvita text-[0.85rem] aria-[current=page]:border-[#261CC1] aria-[current=page]:bg-[#261CC1] aria-[current=page]:text-[#f7fbff]"
                   href={getPageUrl(item)}
                   isActive={item === currentPage}
                   size="icon"
@@ -118,6 +120,7 @@ export function BlogPagination({
             <PaginationItem>
               <PaginationNext
                 aria-label={`Go to page ${currentPage + 1}`}
+                className="min-h-11 rounded-none"
                 href={getPageUrl(currentPage + 1)}
                 size="default"
               />

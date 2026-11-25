@@ -1,127 +1,142 @@
+import { Logger } from "@workspace/logger";
 import { sanityFetch } from "@workspace/sanity/live";
 import { queryAllProjects } from "@workspace/sanity/query";
-import Link from "next/link";
-import { SanityImage } from "@/components/elements/sanity-image";
 import type { Metadata } from "next";
+import { ImageBand } from "@/components/blocks/image-band";
+import { PageCta } from "@/components/blocks/page-cta";
+import { PageHero } from "@/components/blocks/page-hero";
+import { SplitFeature } from "@/components/blocks/split-feature";
+import {
+  type ProjectRow,
+  ProjectStack,
+} from "@/components/blocks/project-stack";
+import { StatsStrip } from "@/components/blocks/stats-strip";
+import {
+  ALL_PROJECTS,
+  PROJECT_CATEGORIES,
+  PROJECT_SECTION_LABEL,
+} from "@/data/pkm-portfolio";
 
 export const metadata: Metadata = {
-  title: "Projects | PKM Consultants",
+  title: "Projects",
   description:
-    "Explore our portfolio of client projects spanning digital transformation, strategic planning, and operational excellence.",
+    "MEPF design projects by PKM Consultants: residential, commercial, metro & transit, industrial, healthcare and institutional buildings across India.",
 };
 
+const logger = new Logger("ProjectsPage");
+
+const code = (index: number) => `P${String(index + 1).padStart(3, "0")}`;
+const cleanTitle = (title: string) => title.trim().replace(/\.$/, "");
+
+async function getSanityProjects() {
+  try {
+    const { data } = await sanityFetch({ query: queryAllProjects });
+    return data ?? [];
+  } catch (error) {
+    logger.error("Failed to fetch projects", error);
+    return [];
+  }
+}
+
+/** Portfolio rows; PKM's role and the consultant of record are always shown. */
+const PORTFOLIO_ROWS: ProjectRow[] = ALL_PROJECTS.map((project, i) => ({
+  id: project.id,
+  code: code(i),
+  title: cleanTitle(project.projectName),
+  category: project.category,
+  scope: project.scopeOfWork,
+  location: project.location,
+  year: project.yearFrom,
+  role: PROJECT_SECTION_LABEL[project.section],
+  consultant:
+    project.mepConsultant.toUpperCase() === "PKM CONSULTANTS"
+      ? undefined
+      : project.mepConsultant,
+}));
+
 export default async function ProjectsPage() {
-  const { data: projects } = await sanityFetch({ query: queryAllProjects });
+  const sanityProjects = await getSanityProjects();
+
+  // Published Sanity case studies (with detail pages) come first.
+  const caseStudies: ProjectRow[] = sanityProjects.map((project, i) => ({
+    id: project._id,
+    code: code(i),
+    title: project.title ?? "Untitled project",
+    category: project.category ?? "Other",
+    scope: project.tags?.join(", ") || "MEPF design",
+    location: project.client ?? undefined,
+    year: project.completedYear,
+    href: project.slug ? `/projects/${project.slug}` : undefined,
+  }));
+
+  const rows =
+    caseStudies.length > 0
+      ? [
+          ...caseStudies,
+          ...PORTFOLIO_ROWS.map((row, i) => ({
+            ...row,
+            code: code(caseStudies.length + i),
+          })),
+        ]
+      : PORTFOLIO_ROWS;
+
+  const categories = [
+    ...PROJECT_CATEGORIES,
+    ...new Set(caseStudies.map((row) => row.category)),
+  ].filter((c, i, all) => all.indexOf(c) === i);
+
+  const stats = [
+    { label: "Projects", value: String(rows.length) },
+    {
+      label: "PKM design",
+      value: String(
+        ALL_PROJECTS.filter((p) => p.section === "pkm_designed").length
+      ),
+    },
+    {
+      label: "Design review",
+      value: String(
+        ALL_PROJECTS.filter((p) => p.section === "review_consultancy").length
+      ),
+    },
+    {
+      label: "Metro & transit",
+      value: String(
+        ALL_PROJECTS.filter((p) => p.category === "Metro & Transit").length
+      ),
+    },
+  ];
 
   return (
-    <main className="min-h-screen">
-      {/* Hero */}
-      <section className="bg-slate-950 py-24 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <p className="mb-4 font-medium text-primary text-sm uppercase tracking-widest">
-            Our Work
-          </p>
-          <h1 className="font-bold text-4xl md:text-6xl">
-            Projects &amp; Case Studies
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-400">
-            A selection of engagements where we've helped clients navigate
-            complexity and achieve measurable results.
-          </p>
-        </div>
-      </section>
+    <>
+      <PageHero
+        eyebrow="Projects"
+        intro="MEPF design, design review and site support on residential, commercial, metro, industrial and institutional buildings across India."
+        title={["The method,", "applied to real buildings"]}
+      />
 
-      {/* Projects Grid */}
-      <section className="container mx-auto px-4 py-20">
-        {!projects || projects.length === 0 ? (
-          <div className="py-24 text-center text-muted-foreground">
-            <p className="text-lg">
-              No projects published yet. Check back soon.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project) => (
-              <Link
-                key={project._id}
-                href={`/projects/${String(project.slug ?? "")
-                  .split("/")
-                  .pop()}`}
-                className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:-translate-y-1 hover:shadow-xl"
-              >
-                {/* Image */}
-                <div className="aspect-video overflow-hidden bg-muted">
-                  {project.image?.id ? (
-                    <SanityImage
-                      image={project.image}
-                      alt={project.title ?? "Project image"}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      width={800}
-                      height={450}
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
-                      <span className="text-4xl">🏗️</span>
-                    </div>
-                  )}
-                </div>
+      <ProjectStack categories={categories} projects={rows} />
 
-                {/* Content */}
-                <div className="flex flex-1 flex-col p-6">
-                  {/* Category badge */}
-                  {project.category && (
-                    <span className="mb-3 inline-block self-start rounded-full bg-primary/10 px-3 py-1 font-medium text-primary text-xs">
-                      {project.category}
-                    </span>
-                  )}
+      <StatsStrip items={stats} />
 
-                  <h2 className="font-bold text-xl leading-tight group-hover:text-primary transition-colors">
-                    {project.title}
-                  </h2>
+      <ImageBand
+        alt="Building under construction"
+        src="/images/building-1.jpg"
+      />
 
-                  {project.description && (
-                    <p className="mt-3 line-clamp-3 text-muted-foreground text-sm leading-relaxed">
-                      {project.description}
-                    </p>
-                  )}
+      <SplitFeature
+        description="Every project follows the same design workflow: load calculations, coordinated drawings, internal quality checks and code compliance review. That is what keeps drawings consistent across sectors and scales."
+        image={{
+          src: "/images/hvac.webp",
+          alt: "Coordinated HVAC layout drawing",
+        }}
+        imageSide="left"
+        label="Method"
+        link={{ href: "/services", label: "How we work" }}
+        title="One consistent process on every project"
+      />
 
-                  <div className="mt-auto flex items-center justify-between pt-5">
-                    {project.client && (
-                      <span className="text-muted-foreground text-sm">
-                        {project.client}
-                      </span>
-                    )}
-                    {project.completedYear && (
-                      <span className="text-muted-foreground text-sm">
-                        {project.completedYear}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Tags */}
-                  {project.tags && project.tags.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {project.tags.slice(0, 3).map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded border px-2 py-0.5 text-muted-foreground text-xs"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {project.tags.length > 3 && (
-                        <span className="text-muted-foreground text-xs">
-                          +{project.tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
+      <PageCta />
+    </>
   );
 }

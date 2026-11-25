@@ -23,7 +23,7 @@ const DEFAULT_PILLARS: ValuePillarItem[] = [
       "HVAC, electrical, plumbing and fire services are designed together from concept stage, so clashes are resolved before installation begins.",
     href: "/projects",
     buttonLabel: "See our projects",
-    image: "/images/coordinated-mep-design.webp",
+    image: "/images/hvac.webp",
     imageAlt:
       "Coordinated MEP services layout showing ducts, pipes and cable trays",
   },
@@ -34,7 +34,7 @@ const DEFAULT_PILLARS: ValuePillarItem[] = [
       "Accurate HVAC load calculations and right-sized systems cut wasted energy and support IGBC, LEED and ECBC requirements.",
     href: "/projects",
     buttonLabel: "View sustainable projects",
-    image: "/images/energy-efficient-hvac-design.webp",
+    image: "/images/electrical.jpg",
     imageAlt:
       "Energy-efficient rooftop HVAC units on a green-certified commercial building",
   },
@@ -45,7 +45,7 @@ const DEFAULT_PILLARS: ValuePillarItem[] = [
       "NBC and NFPA-compliant drawings with clear documentation help you secure fire and statutory approvals sooner.",
     href: "/contact",
     buttonLabel: "Discuss your project",
-    image: "/images/fire-life-safety-design.webp",
+    image: "/images/fps.webp",
     imageAlt:
       "Engineer reviewing NFPA-compliant fire protection sprinkler layout drawings",
   },
