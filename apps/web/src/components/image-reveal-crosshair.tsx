@@ -3,8 +3,9 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
-import { type PointerEvent, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
+import { Crosshair } from "@/components/crosshair";
 import { MOTION_OK, REDUCED_MOTION } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -32,8 +33,8 @@ const LABEL =
 /**
  * Drafting-sheet section: a large photo on the left that unrolls from its
  * top-left corner on scroll, with tracking lines and an X / Y readout riding
- * its moving corner, and a separate panel on the right whose crosshair follows
- * the mouse (resting at a fixed point on touch / when the pointer leaves).
+ * its moving corner, and a panel on the right with the shared <Crosshair />
+ * (follows the mouse, rests at a fixed point on touch / when the pointer leaves).
  */
 export function ImageRevealCrosshair({
   src,
@@ -47,11 +48,6 @@ export function ImageRevealCrosshair({
   const imgRef = useRef<HTMLImageElement>(null);
   const revealXRef = useRef<HTMLSpanElement>(null);
   const revealYRef = useRef<HTMLSpanElement>(null);
-
-  const panelRef = useRef<HTMLDivElement>(null);
-  const crossXRef = useRef<HTMLSpanElement>(null);
-  const crossYRef = useRef<HTMLSpanElement>(null);
-  const frame = useRef(0);
 
   /* ── Image reveal: scroll-scrubbed clip from the top-left corner ── */
   useEffect(() => {
@@ -104,56 +100,6 @@ export function ImageRevealCrosshair({
 
     return () => mm.revert();
   }, []);
-
-  /* ── Right panel crosshair: rest position + readout ── */
-  const setCross = (x: number, y: number) => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    panel.style.setProperty("--cx", `${x}px`);
-    panel.style.setProperty("--cy", `${y}px`);
-    if (crossXRef.current)
-      crossXRef.current.textContent = `X: ${Math.round(x)}`;
-    if (crossYRef.current)
-      crossYRef.current.textContent = `Y: ${Math.round(y)}`;
-  };
-
-  const rest = () => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    panel.dataset.idle = "true";
-    setCross(panel.clientWidth * REST_X, panel.clientHeight * REST_Y);
-  };
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: rest only reads refs
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!panel) return;
-    rest();
-    const observer = new ResizeObserver(() => {
-      if (panel.dataset.idle === "true") rest();
-    });
-    observer.observe(panel);
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(frame.current);
-    };
-  }, []);
-
-  const move = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== "mouse") return;
-    const panel = panelRef.current;
-    if (!panel) return;
-    const rect = panel.getBoundingClientRect();
-    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
-    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
-    panel.dataset.idle = "false";
-    cancelAnimationFrame(frame.current);
-    frame.current = requestAnimationFrame(() => setCross(x, y));
-  };
-
-  // Lines glide back to the rest point, but follow the mouse with no lag
-  const glide =
-    "group-data-[idle=true]/panel:transition-[left,top] group-data-[idle=true]/panel:duration-700 group-data-[idle=true]/panel:ease-[cubic-bezier(0.16,1,0.3,1)]";
 
   return (
     <section
@@ -229,41 +175,11 @@ export function ImageRevealCrosshair({
           </div>
         </div>
 
-        {/* ── Right: crosshair panel ── */}
-        <div
-          aria-hidden="true"
-          className="group/panel relative min-h-72 overflow-hidden border-[#121212]/15 border-t [--cx:40%] [--cy:62%] lg:min-h-0 lg:border-t-0"
-          data-idle="true"
-          onPointerLeave={rest}
-          onPointerMove={move}
-          ref={panelRef}
-        >
-          <span
-            className={`${LINE} inset-y-0 w-px ${glide}`}
-            style={{ left: "var(--cx)" }}
-          />
-          <span
-            className={`${LINE} inset-x-0 h-px ${glide}`}
-            style={{ top: "var(--cy)" }}
-          />
-          <span
-            className={`${DOT} ${glide}`}
-            style={{ left: "var(--cx)", top: "var(--cy)" }}
-          />
-          <span
-            className={`${LABEL} -translate-y-full ml-3 -mt-2 ${glide}`}
-            ref={crossXRef}
-            style={{ left: "var(--cx)", top: "var(--cy)" }}
-          >
-            X: 0
-          </span>
-          <span
-            className={`${LABEL} -translate-x-full mt-3 -ml-3 ${glide}`}
-            ref={crossYRef}
-            style={{ left: "var(--cx)", top: "var(--cy)" }}
-          >
-            Y: 0
-          </span>
+        {/* ── Right: crosshair panel (shared Crosshair, rests when idle) ── */}
+        <div className="relative min-h-72 border-[#121212]/15 border-t lg:min-h-0 lg:border-t-0">
+          <div className="absolute inset-0">
+            <Crosshair rest={[REST_X, REST_Y]} />
+          </div>
         </div>
       </div>
     </section>
