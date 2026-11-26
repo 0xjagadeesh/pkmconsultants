@@ -1,7 +1,13 @@
 "use client";
 
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+
+import { MOBILE_MOTION } from "@/lib/motion";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* ─────────────────────────────────────────────
    FONT STACK & CONSTANTS
@@ -23,6 +29,8 @@ const WORDMARK_ASCENT = 0.75;
 // a layout box that starts at the cap top and ends at the baseline.
 const WORDMARK_OVERSHOOT =
   (1 - WORDMARK_INK) / 2 - (WORDMARK_ASCENT - WORDMARK_INK);
+// From lg up the footer is exactly one screen tall; the wordmark fills what's left
+const FIT_HEIGHT_QUERY = "(min-width: 1024px)";
 
 // Shared 3-column grid so blocks, top strip and bottom row line up
 const FOOTER_COLS = "lg:grid-cols-[1.05fr_1fr_1fr]";
@@ -140,11 +148,19 @@ export function Footer() {
         band.clientWidth -
         Number.parseFloat(style.paddingLeft) -
         Number.parseFloat(style.paddingRight);
+      // Height only constrains the wordmark when the footer is screen-locked
+      const availableHeight = window.matchMedia(FIT_HEIGHT_QUERY).matches
+        ? band.clientHeight -
+          Number.parseFloat(style.paddingTop) -
+          Number.parseFloat(style.paddingBottom)
+        : Number.POSITIVE_INFINITY;
+
       word.style.fontSize = `${WORDMARK_PROBE}px`;
       const measured = word.getBoundingClientRect().width;
       if (measured <= 0) return;
       const byWidth = (WORDMARK_PROBE * availableWidth) / measured;
-      word.style.fontSize = `${Math.max(0, byWidth)}px`;
+      const byHeight = availableHeight / WORDMARK_INK;
+      word.style.fontSize = `${Math.max(0, Math.min(byWidth, byHeight))}px`;
     };
 
     fit();
@@ -154,21 +170,46 @@ export function Footer() {
     return () => observer.disconnect();
   }, []);
 
-  /* Curtain reveal: the strip + link blocks scroll normally and sit above
-     (z-10, opaque); the wordmark + bottom row are `sticky bottom-0`, so they
-     stay pinned to the viewport bottom behind the blocks and are uncovered as
-     the blocks scroll away. Pure CSS, so it never depends on measured scroll
-     positions that go stale when content above changes height.
-     The footer itself must not clip overflow (that would break sticky). */
+  /* Below lg: wordmark slides up into its band as the footer scrolls in.
+     From lg the whole footer is revealed from underneath the page instead
+     (sticky, see below), so no scroll-linked tween is needed there. */
+  useEffect(() => {
+    const band = bandRef.current;
+    const word = wordRef.current;
+    if (!(band && word)) return;
+
+    const mm = gsap.matchMedia(band);
+    mm.add(MOBILE_MOTION, () => {
+      gsap.fromTo(
+        word,
+        { yPercent: 40 },
+        {
+          yPercent: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: band,
+            start: "top bottom",
+            end: "bottom bottom",
+            scrub: true,
+          },
+        }
+      );
+    });
+    return () => mm.revert();
+  }, []);
+
   return (
+    // Curtain reveal (lg+): the footer is one screen tall and sticks to the
+    // viewport bottom under the page content (z-10 wrapper in layout.tsx),
+    // so the page slides up and uncovers it. Below lg it scrolls normally.
     <footer
-      className="relative bg-[#f7fbff] text-[#121212]"
+      className="relative overflow-hidden bg-[#f7fbff] text-[#121212] lg:sticky lg:bottom-0 lg:z-0 lg:flex lg:h-svh lg:flex-col"
       style={{ fontFamily: SUISSE_FONT_STACK }}
     >
       {/* ── 1. Top strip — empty gridline row ── */}
       <div
         aria-hidden="true"
-        className={`relative z-10 hidden h-14 grid-cols-1 border-[#121212]/15 border-t bg-[#f7fbff] lg:grid ${FOOTER_COLS}`}
+        className={`hidden h-14 shrink-0 grid-cols-1 border-[#121212]/15 border-t lg:grid ${FOOTER_COLS}`}
       >
         <div className="border-[#121212]/15 border-r" />
         <div />
@@ -178,7 +219,7 @@ export function Footer() {
       {/* ── 2. Link blocks ── */}
       <nav
         aria-label="Footer"
-        className={`relative z-10 grid grid-cols-2 border-[#121212]/15 border-y bg-[#f7fbff] ${FOOTER_COLS}`}
+        className={`grid shrink-0 grid-cols-2 border-[#121212]/15 border-t ${FOOTER_COLS}`}
       >
         {FOOTER_BLOCKS.map((block, index) => (
           <div
@@ -224,59 +265,57 @@ export function Footer() {
         ))}
       </nav>
 
-      {/* ── 3 + 4. Revealed layer: wordmark band + bottom row ── */}
-      <div className="sticky bottom-0 z-0 bg-[#f7fbff]">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none relative flex select-none items-center justify-center overflow-hidden px-6 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-[clamp(1.25rem,4svh,3rem)]"
-          ref={bandRef}
+      {/* ── 3. Wordmark band ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none relative flex select-none items-center justify-center overflow-hidden border-[#121212]/15 border-t px-6 py-5 sm:px-8 sm:py-8 lg:min-h-0 lg:flex-1 lg:basis-0 lg:px-12 lg:py-[clamp(1.25rem,4svh,3rem)]"
+        ref={bandRef}
+      >
+        <span
+          className="block w-fit whitespace-nowrap text-[#261CC1] text-[16vw] uppercase tracking-[0.01em] will-change-transform"
+          ref={wordRef}
+          style={{ fontFamily: "'Pillar', 'Piller', sans-serif" }}
         >
+          {/* Layout box = ink box (cap top → baseline) */}
           <span
-            className="block w-fit whitespace-nowrap text-[#261CC1] text-[16vw] uppercase tracking-[0.01em]"
-            ref={wordRef}
-            style={{ fontFamily: "'Pillar', 'Piller', sans-serif" }}
+            className="block"
+            style={{
+              lineHeight: WORDMARK_INK,
+              paddingTop: `${WORDMARK_OVERSHOOT}em`,
+              marginBottom: `${-WORDMARK_OVERSHOOT}em`,
+            }}
           >
-            {/* Layout box = ink box (cap top → baseline) */}
-            <span
-              className="block"
-              style={{
-                lineHeight: WORDMARK_INK,
-                paddingTop: `${WORDMARK_OVERSHOOT}em`,
-                marginBottom: `${-WORDMARK_OVERSHOOT}em`,
-              }}
-            >
-              PKM Consultants
-            </span>
+            PKM Consultants
           </span>
-        </div>
+        </span>
+      </div>
 
-        {/* ── 4. Bottom row — aligned to the block columns ── */}
-        <div
-          className={`grid grid-cols-2 gap-x-6 gap-y-0 border-[#121212]/15 border-t px-6 py-2 font-mosvita text-[#121212] text-[0.75rem] uppercase tracking-[0.04em] sm:px-8 lg:gap-x-0 lg:px-0 lg:py-0 ${FOOTER_COLS}`}
-        >
-          <span className="col-span-2 flex min-h-11 items-center font-bold lg:col-span-1 lg:min-h-16 lg:px-6">
-            © {YEAR} PKM Consultants
+      {/* ── 4. Bottom row — aligned to the block columns ── */}
+      <div
+        className={`grid shrink-0 grid-cols-2 gap-x-6 gap-y-0 border-[#121212]/15 border-t px-6 py-2 font-mosvita text-[#121212] text-[0.75rem] uppercase tracking-[0.04em] sm:px-8 lg:gap-x-0 lg:px-0 lg:py-0 ${FOOTER_COLS}`}
+      >
+        <span className="col-span-2 flex min-h-11 items-center font-bold lg:col-span-1 lg:min-h-16 lg:px-6">
+          © {YEAR} PKM Consultants
+        </span>
+        <span className="flex items-center lg:px-6">
+          <Link
+            className="inline-flex min-h-11 items-center transition-colors hover:text-[#261CC1] lg:pointer-fine:min-h-0"
+            href="/terms"
+          >
+            Terms of Service
+          </Link>
+        </span>
+        <span className="flex items-center justify-between gap-6 lg:px-6">
+          <Link
+            className="inline-flex min-h-11 items-center transition-colors hover:text-[#261CC1] lg:pointer-fine:min-h-0"
+            href="/privacy"
+          >
+            Privacy Policy
+          </Link>
+          <span className="hidden text-[#5b5a8a] lg:inline">
+            13.0827° N · 80.2707° E
           </span>
-          <span className="flex items-center lg:px-6">
-            <Link
-              className="inline-flex min-h-11 items-center transition-colors hover:text-[#261CC1] lg:pointer-fine:min-h-0"
-              href="/terms"
-            >
-              Terms of Service
-            </Link>
-          </span>
-          <span className="flex items-center justify-between gap-6 lg:px-6">
-            <Link
-              className="inline-flex min-h-11 items-center transition-colors hover:text-[#261CC1] lg:pointer-fine:min-h-0"
-              href="/privacy"
-            >
-              Privacy Policy
-            </Link>
-            <span className="hidden text-[#5b5a8a] lg:inline">
-              13.0827° N · 80.2707° E
-            </span>
-          </span>
-        </div>
+        </span>
       </div>
     </footer>
   );
