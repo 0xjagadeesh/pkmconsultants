@@ -1,9 +1,5 @@
-import { client, urlFor } from "@workspace/sanity/client";
-import { querySettingsData } from "@workspace/sanity/query";
-import type {
-  QueryBlogSlugPageDataResult,
-  QuerySettingsDataResult,
-} from "@workspace/sanity/types";
+import { urlFor } from "@workspace/sanity/client";
+import type { QueryBlogSlugPageDataResult } from "@workspace/sanity/types";
 import { stegaClean } from "next-sanity";
 import type {
   Answer,
@@ -19,7 +15,22 @@ import type {
   WithContext,
 } from "schema-dts";
 
-import { getBaseUrl, handleErrors } from "@/utils";
+import { getBaseUrl } from "@/utils";
+
+/** Site owner details used in structured data (matches footer / contact). */
+const PKM_ORGANIZATION = {
+  name: "PKM Consultants",
+  description:
+    "PKM Consultants – MEPF design and engineering consultancy based in Chennai, India.",
+  email: "info@pkmconsultants.in",
+  address: {
+    streetAddress: "Plot No. 34, Rayal Castle Phase 1, Kolapancheri",
+    addressLocality: "Chennai",
+    addressRegion: "Tamil Nadu",
+    postalCode: "600072",
+    addressCountry: "IN",
+  },
+};
 
 type RichTextChild = {
   _type: string;
@@ -127,12 +138,8 @@ function buildSafeImageUrl(image?: { id?: string | null }) {
 // Article JSON-LD Component
 type ArticleJsonLdProps = {
   article: QueryBlogSlugPageDataResult;
-  settings?: QuerySettingsDataResult;
 };
-export function ArticleJsonLd({
-  article: rawArticle,
-  settings,
-}: ArticleJsonLdProps) {
+export function ArticleJsonLd({ article: rawArticle }: ArticleJsonLdProps) {
   if (!rawArticle) {
     return null;
   }
@@ -165,13 +172,7 @@ export function ArticleJsonLd({
       : [],
     publisher: {
       "@type": "Organization",
-      name: settings?.siteTitle || "Website",
-      logo: settings?.logo
-        ? ({
-            "@type": "ImageObject",
-            url: settings.logo,
-          } as ImageObject)
-        : undefined,
+      name: PKM_ORGANIZATION.name,
     } as Organization,
     datePublished: new Date(
       article.publishedAt || article._createdAt || new Date().toISOString()
@@ -191,98 +192,66 @@ export function ArticleJsonLd({
   );
 }
 
-// Organization JSON-LD Component
-type OrganizationJsonLdProps = {
-  settings: QuerySettingsDataResult;
-};
-
-export function OrganizationJsonLd({ settings }: OrganizationJsonLdProps) {
-  if (!settings) {
-    return null;
-  }
-
+// Organization JSON-LD Component — PKM Consultants details live in code
+// (the Sanity "settings" document still holds template seed data).
+export function OrganizationJsonLd() {
   const baseUrl = getBaseUrl();
-
-  const socialLinks = settings.socialLinks
-    ? (Object.values(settings.socialLinks).filter(Boolean) as string[])
-    : undefined;
 
   const organizationJsonLd: WithContext<Organization> = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: settings.siteTitle,
-    description: settings.siteDescription || undefined,
+    name: PKM_ORGANIZATION.name,
+    description: PKM_ORGANIZATION.description,
     url: baseUrl,
-    logo: settings.logo
-      ? ({
-          "@type": "ImageObject",
-          url: settings.logo,
-        } as ImageObject)
-      : undefined,
-    contactPoint: settings.contactEmail
-      ? ({
-          "@type": "ContactPoint",
-          email: settings.contactEmail,
-          contactType: "customer service",
-        } as ContactPoint)
-      : undefined,
-    sameAs: socialLinks?.length ? socialLinks : undefined,
+    email: PKM_ORGANIZATION.email,
+    address: {
+      "@type": "PostalAddress",
+      ...PKM_ORGANIZATION.address,
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      email: PKM_ORGANIZATION.email,
+      contactType: "customer service",
+      areaServed: "IN",
+    } as ContactPoint,
   };
 
   return <JsonLdScript data={organizationJsonLd} id="organization-json-ld" />;
 }
 
 // Website JSON-LD Component
-type WebSiteJsonLdProps = {
-  settings: QuerySettingsDataResult;
-};
-
-export function WebSiteJsonLd({ settings }: WebSiteJsonLdProps) {
-  if (!settings) {
-    return null;
-  }
-
+export function WebSiteJsonLd() {
   const baseUrl = getBaseUrl();
 
   const websiteJsonLd: WithContext<WebSite> = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: settings.siteTitle,
-    description: settings.siteDescription || undefined,
+    name: PKM_ORGANIZATION.name,
+    description: PKM_ORGANIZATION.description,
     url: baseUrl,
     publisher: {
       "@type": "Organization",
-      name: settings.siteTitle,
+      name: PKM_ORGANIZATION.name,
     } as Organization,
   };
 
   return <JsonLdScript data={websiteJsonLd} id="website-json-ld" />;
 }
 
-// Combined JSON-LD Component for pages with multiple structured data
+// Combined JSON-LD Component for site-wide structured data
 type CombinedJsonLdProps = {
-  settings?: QuerySettingsDataResult;
-  article?: QueryBlogSlugPageDataResult;
-  faqs?: FlexibleFaq[];
   includeWebsite?: boolean;
   includeOrganization?: boolean;
 };
 
-export async function CombinedJsonLd({
+export function CombinedJsonLd({
   includeWebsite = false,
   includeOrganization = false,
 }: CombinedJsonLdProps) {
-  const [res] = await handleErrors(client.fetch(querySettingsData));
-
-  const cleanSettings = stegaClean(res);
   return (
     <>
-      {includeWebsite && cleanSettings && (
-        <WebSiteJsonLd settings={cleanSettings} />
-      )}
-      {includeOrganization && cleanSettings && (
-        <OrganizationJsonLd settings={cleanSettings} />
-      )}
+      {includeWebsite && <WebSiteJsonLd />}
+      {includeOrganization && <OrganizationJsonLd />}
     </>
   );
 }

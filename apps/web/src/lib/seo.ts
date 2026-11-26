@@ -7,7 +7,6 @@ import { capitalize, getBaseUrl } from "@/utils";
 type SiteConfig = {
   title: string;
   description: string;
-  twitterHandle: string;
   keywords: string[];
 };
 
@@ -29,12 +28,20 @@ type OgImageParams = {
   id?: string;
 };
 
-// Default site configuration
+// Default site configuration (keep in sync with the root layout metadata)
 const siteConfig: SiteConfig = {
-  title: "Roboto Studio Demo",
-  description: "Roboto Studio Demo",
-  twitterHandle: "@studioroboto",
-  keywords: ["roboto", "studio", "demo", "sanity", "next", "react", "template"],
+  title: "PKM Consultants",
+  description:
+    "PKM Consultants – MEPF design and engineering consultancy based in Chennai, India.",
+  keywords: [
+    "PKM Consultants",
+    "MEPF design",
+    "MEP consultants Chennai",
+    "HVAC design",
+    "plumbing design",
+    "electrical design",
+    "fire protection design",
+  ],
 };
 
 function generateOgImageUrl(params: OgImageParams = {}): string {
@@ -111,14 +118,16 @@ export function getSEOMetadata(page: PageSeoData = {}): Metadata {
     id: contentId,
   });
 
-  const fullTitle =
+  // The root layout's title template already appends " | PKM Consultants",
+  // so pass the bare page title; the site name alone is used as-is.
+  const title: Metadata["title"] =
     defaultTitle === siteConfig.title
-      ? defaultTitle
-      : `${defaultTitle} | ${siteConfig.title}`;
+      ? { absolute: siteConfig.title }
+      : defaultTitle;
 
   // Build default metadata object
   const defaultMetadata: Metadata = {
-    title: fullTitle,
+    title,
     description: defaultDescription,
     metadataBase: new URL(baseUrl),
     creator: siteConfig.title,
@@ -131,7 +140,6 @@ export function getSEOMetadata(page: PageSeoData = {}): Metadata {
     twitter: {
       card: "summary_large_image",
       images: [ogImage],
-      creator: siteConfig.twitterHandle,
       title: defaultTitle,
       description: defaultDescription,
     },
@@ -140,7 +148,7 @@ export function getSEOMetadata(page: PageSeoData = {}): Metadata {
     },
     openGraph: {
       type: pageType ?? "website",
-      countryName: "UK",
+      countryName: "India",
       description: defaultDescription,
       title: defaultTitle,
       images: [
