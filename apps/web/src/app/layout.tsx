@@ -83,8 +83,7 @@ export default async function RootLayout({
       <body className="antialiased">
         <Providers>
           <Navbar />
-          {/* Opaque layer above the footer so it can be revealed from below */}
-          <div className="relative z-10 bg-[#f7fbff]">{children}</div>
+          {children}
           <Footer />
           <PageTransition />
           <NoImageDrag />
