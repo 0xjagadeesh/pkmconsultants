@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+
 import { MOTION_OK } from "@/lib/motion";
 import { ImageClipReveal } from "./image-clip-reveal";
 import { MaskRevealText } from "./mask-reveal-text";
@@ -104,30 +105,36 @@ function GhostButton({ href, label }: { href: string; label: string }) {
 /* ═══════════════════════════════════════════════════════════════
    MAIN EXPORT
 ═══════════════════════════════════════════════════════════════ */
-const BLOCKS = [
-  {
-    label: "Approach",
-    description:
-      "A digital, coordinated process that integrates MEP design, engineering, BIM coordination and site support to achieve precision, clash-free drawings and measurable results.",
-    href: "/about",
-  },
-  {
-    label: "Company",
-    description:
-      "Operating as one integrated team, aligning engineers, designers and BIM coordinators to deliver reliable, traceable and consistent MEP designs with greater predictability and control.",
-    href: "/about",
-  },
-];
+export type RevealBlock = {
+  label: string;
+  description: string;
+  href: string;
+  linkLabel?: string;
+};
 
-export function ScrollRevealSplit() {
+type ScrollRevealSplitProps = {
+  image: { src: string; alt: string };
+  /** One string per line for the mask reveal */
+  headingLines: string[];
+  subtitle: string;
+  /** Two columns under the heading */
+  blocks: RevealBlock[];
+};
+
+export function ScrollRevealSplit({
+  image,
+  headingLines,
+  subtitle,
+  blocks,
+}: ScrollRevealSplitProps) {
   return (
     <section className="bg-[#f7fbff] w-full">
       <div className="grid grid-cols-1 lg:min-h-svh lg:grid-cols-2">
         {/* LEFT — image + tracking lines, 90% reveal */}
         <div className="relative aspect-[4/3] w-full sm:aspect-[16/10] lg:aspect-auto lg:min-h-[70vmin]">
           <ImageClipReveal
-            src="/images/coor-section-2-pkm.gif"
-            alt="MEPF engineering on site"
+            src={image.src}
+            alt={image.alt}
             fill
             sizes="(min-width: 1024px) 45vw, 90vw"
           />
@@ -141,11 +148,7 @@ export function ScrollRevealSplit() {
               as="h2"
               className="font-extrabold font-mosvita text-[#1e1926] tracking-[-0.03em] leading-[1.1] m-0"
               style={{ fontSize: "clamp(2rem, 3vw, 3.2rem)" }}
-              lines={[
-                "Industrialized MEP design and",
-                "model-driven coordination to",
-                "deliver with certainty",
-              ]}
+              lines={headingLines}
               maskColor="#1e1926"
               duration={0.9}
               stagger={0.14}
@@ -153,13 +156,13 @@ export function ScrollRevealSplit() {
             {/* Spacer pushes subtitle to bottom of this zone */}
             <div className="flex-1" />
             <p className="text-[0.95rem] leading-[1.75] text-[#5a5270] mt-6 max-w-[600px]">
-              Coordinated, Standardized, and constructible MEP processes.
+              {subtitle}
             </p>
           </div>
 
           {/* BOTTOM — two columns side by side */}
           <div className="grid grid-cols-1 divide-y divide-[#c4c2e8] sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-            {BLOCKS.map((block) => (
+            {blocks.map((block) => (
               <div
                 key={block.label}
                 className="flex flex-col px-6 pt-4 pb-8 sm:px-10 sm:pt-2 sm:pb-6 lg:px-4"
@@ -168,7 +171,10 @@ export function ScrollRevealSplit() {
                 <p className="mt-2 text-[0.82rem] leading-[1.78] text-[#5a5270]">
                   {block.description}
                 </p>
-                <GhostButton href={block.href} label="Learn more" />
+                <GhostButton
+                  href={block.href}
+                  label={block.linkLabel ?? "Learn more"}
+                />
               </div>
             ))}
           </div>

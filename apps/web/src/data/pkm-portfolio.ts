@@ -4,10 +4,15 @@
  * moved into Sanity. Company identifiers (PAN, GST) are intentionally not here.
  */
 
+/** URL segment for /services/[slug] */
+export type ServiceSlug = "hvac" | "phe" | "fps" | "elv" | "electrical";
+
 export interface ServiceScopeItem {
+  slug: ServiceSlug;
   discipline: string;
   shortTitle: string;
-  description: string;
+  /** One-line benefit (≤15 words) used on cards across the site */
+  benefit: string;
   deliverables: string[];
 }
 
@@ -53,57 +58,62 @@ export interface Project {
 
 export const SCOPE_OF_SERVICES: ServiceScopeItem[] = [
   {
+    slug: "hvac",
+    discipline: "HVAC Design & Engineering",
+    shortTitle: "Air Conditioning & Ventilation",
+    benefit: "Lower running costs, better indoor air and no ceiling clashes.",
+    deliverables: [
+      "Heat load calculations and equipment selection",
+      "Chilled water, VRF and ducted split system layouts",
+      "Ductwork, piping and diffuser layouts coordinated with ceilings and structure",
+      "Basement ventilation, staircase pressurisation and smoke extraction design",
+    ],
+  },
+  {
+    slug: "phe",
     discipline: "Plumbing & Public Health Engineering (PHE)",
     shortTitle: "Plumbing & Drainage",
-    description:
-      "Comprehensive design of internal and external water supply, soil, waste, vent piping, drainage pumping systems, sewerage networks, and rainwater harvesting conforming to NBC & BIS standards.",
+    benefit:
+      "Clash-free execution, lower water use and drainage that performs.",
     deliverables: [
       "Internal soil, waste, vent pipe and water supply arrangements",
       "Drains and specialized pumping systems design",
       "External water supply and sewerage network planning",
-      "Rain water harvesting systems compliant with local municipal norms and NBC / BIS",
+      "Rainwater harvesting systems to local municipal norms",
     ],
   },
   {
-    discipline: "STP & WTP Systems",
-    shortTitle: "Sewage & Water Treatment",
-    description:
-      "Techno-economic schemes for sewage treatment plants (STP) and water treatment plants (WTP) with sustainable recycling for flushing, gardening, and cooling tower makeup.",
-    deliverables: [
-      "Scheme for Sewage Treatment Plant (STP) & Water Treatment Plant (WTP)",
-      "Recycling and re-use schemes for treated effluent",
-      "Sludge handling and disinfection protocols",
-    ],
-  },
-  {
+    slug: "fps",
     discipline: "Fire Fighting & Life Safety",
     shortTitle: "Fire Hydrant & Sprinklers",
-    description:
-      "Active fire protection engineering including internal/external yard hydrants, wet riser, automatic sprinkler systems, fire pump room layouts conforming to NFPA, NBC of India, and local Fire Services NOC guidelines.",
+    benefit:
+      "Approval-ready drawings, fewer authority comments and a safer building.",
     deliverables: [
       "Yard hydrant and wet riser system layouts",
       "Automatic fire sprinkler network design",
       "Fire water static storage tank sizing and pump head calculations",
-      "Compliance with National Building Code (NBC) & BIS norms",
+      "Fire NOC drawings and authority documentation",
     ],
   },
   {
+    slug: "elv",
     discipline: "Fire Alarm & Low Voltage (ELV)",
     shortTitle: "Fire Alarm, PA & CCTV",
-    description:
-      "Design and engineering for addressable fire alarm systems, public address / mass notification systems, and integrated CCTV surveillance networks.",
+    benefit:
+      "Full detection and security coverage, integrated with fire and HVAC.",
     deliverables: [
       "Addressable fire detection and alarm system layouts",
       "Public address (PA) and mass evacuation system design",
       "CCTV surveillance camera coverage and cable pathways",
-      "Statutory coordination with local fire authority codes",
+      "Fire alarm interfaces with HVAC, lifts and access control",
     ],
   },
   {
+    slug: "electrical",
     discipline: "Electrical Systems",
     shortTitle: "Power, Lighting & Earthing",
-    description:
-      "High and low voltage distribution, main single line diagrams (SLD), connected load calculations, lighting control, power outlets, cable tray routing, substation layouts, DG sets, and earthing design.",
+    benefit:
+      "Safe, compliant power distribution with room to grow, without costly retrofits.",
     deliverables: [
       "Lighting switch control, power layouts, cable tray and conduit containment",
       "Substation, transformer, DG sets, and electrical equipment layouts",

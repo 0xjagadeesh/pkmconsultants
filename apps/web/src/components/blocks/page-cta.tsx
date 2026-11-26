@@ -13,7 +13,7 @@ type PageCtaProps = {
  * architectural grid (Enerblock prefooter pattern, PKM colours).
  */
 export function PageCta({
-  narrative = "Tell us about your commercial, industrial or high-rise project and we will advise on the right MEPF design scope, codes and timeline for it.",
+  narrative = "Tell us about your project and we will advise on the right MEPF scope, codes and timeline.",
   title = "Start your project with reliable MEPF design",
   buttonLabel = "Contact us",
   buttonHref = "/contact",

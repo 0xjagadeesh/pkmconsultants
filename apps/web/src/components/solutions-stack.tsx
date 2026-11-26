@@ -3,8 +3,10 @@
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { Fragment, useEffect, useRef } from "react";
+
 import { ButtonZoomIn } from "@/components/buttonzoomin";
 import { CursorTracker } from "@/components/cursor-tracker";
+import { SCOPE_OF_SERVICES, type ServiceSlug } from "@/data/pkm-portfolio";
 
 /* ── Stack tuning ──
    Card N pins at N × (header strip height) from the top, so every earlier card
@@ -13,86 +15,51 @@ import { CursorTracker } from "@/components/cursor-tracker";
    so their whole content is readable before the next card slides over. */
 const STACK_BOTTOM_GAP = 16;
 
-/* ── Solutions Content Data (MEPF Engineering Scope) ── */
-const STACK_ITEMS = [
+/* ── Solutions content ──
+   Headline + image live here; discipline name and benefit line come from
+   SCOPE_OF_SERVICES so the same one-liner is used site-wide. Full scope lives
+   on /services/[slug]. */
+const STACK_CARDS: { slug: ServiceSlug; title: string; image: string }[] = [
   {
-    order: "01",
-    pretitle: "HVAC Design & Engineering",
-    title:
-      "Right-sized cooling and ventilation, not over-designed, not under-delivering.",
-    description:
-      "Oversized plant wastes capital and runs inefficiently. Undersized plant fails on the first hot day. We run room-by-room heat load calculations and select VRF or chilled water systems to match how your building will actually be used. Ductwork and equipment are coordinated against structure and ceiling heights before drawings are issued.",
-    benefit:
-      "Lower running costs, better indoor air quality, and no ceiling clashes.",
-    systems: [
-      "Heat Load Calculations",
-      "VRF & Chilled Water Design",
-      "Ductwork Layouts",
-      "Ventilation",
-      "Equipment Selection",
-    ],
+    slug: "hvac",
+    title: "Right-sized cooling and ventilation, not over-designed.",
     image: "/images/hvac.webp",
-    href: "/services",
   },
-
   {
-    order: "02",
-    pretitle: "Plumbing & Public Health Engineering (PHE)",
-    title:
-      "Efficient water supply and drainage that works on handover, not just on paper.",
-    description:
-      "Plumbing is where late-stage clashes with structure and architecture are most expensive. We size systems to national codes and coordinate them with your team early, so shafts, slopes and levels are resolved before construction starts. Sustainable water management, including rainwater harvesting and STP/WTP integration, is part of the design from the start.",
-    benefit:
-      "Clash-free execution, lower water use, and drainage that performs.",
-    systems: [
-      "Domestic Water",
-      "Sanitary Drainage",
-      "Stormwater",
-      "Rainwater Harvesting",
-      "STP/WTP Integration",
-    ],
+    slug: "phe",
+    title: "Water supply and drainage that work on handover.",
     image: "/images/plumbing.webp",
-    href: "/services",
   },
   {
-    order: "03",
-    pretitle: "Electrical Design: HT & LT Power Systems",
-    title:
-      "Reliable power from grid to final circuit, ready for tomorrow's load.",
-    description:
-      "Undersized panels and weak earthing cause downtime and failed inspections. Every design is backed by load calculations and short-circuit studies, so protection, cabling and capacity are right on day one and have headroom to grow.",
-    benefit:
-      "Safe, compliant distribution and room for expansion without costly retrofits.",
-    systems: [
-      "HT & LT Panels",
-      "Transformers & DG Sets",
-      "Bus Ducts",
-      "Lighting & Small Power",
-      "Earthing & Lightning Protection",
-    ],
+    slug: "electrical",
+    title: "Reliable power from grid to final circuit.",
     image: "/images/electrical.jpg",
-    href: "/services",
   },
   {
-    order: "04",
-    pretitle: "Fire Protection Design",
-    title:
-      "Life safety designed in from day one, with drawings built to clear approval.",
-    description:
-      "Fire approvals can stall a whole project. Our drawings follow the National Building Code (NBC), NFPA standards and local fire authority requirements, which shortens the statutory clearance process and protects your handover date.",
-    benefit:
-      "Approval-ready drawings, fewer authority comments, and a safer building.",
-    systems: [
-      "Fire Hydrants",
-      "Sprinklers & Wet Risers",
-      "Fire Pump Rooms",
-      "Fire Alarm Systems",
-      "PA Networks",
-    ],
+    slug: "fps",
+    title: "Life safety designed in, with drawings built to clear approval.",
     image: "/images/fps.webp",
-    href: "/services",
+  },
+  {
+    slug: "elv",
+    title: "Fire alarm, PA and CCTV that work as one system.",
+    image: "/images/panel.jpg",
   },
 ];
+
+const STACK_ITEMS = STACK_CARDS.flatMap((card, i) => {
+  const scope = SCOPE_OF_SERVICES.find((s) => s.slug === card.slug);
+  if (!scope) return [];
+  return [
+    {
+      ...card,
+      order: String(i + 1).padStart(2, "0"),
+      pretitle: scope.discipline,
+      benefit: scope.benefit,
+      href: `/services/${card.slug}`,
+    },
+  ];
+});
 
 /* ── Architectural Slanted Dash SVG ── */
 function SlantedDash() {
@@ -240,7 +207,7 @@ export function SolutionsStack() {
                 </div>
 
                 {/* ── COLUMN 3: Content & Action ── */}
-                <div className="flex flex-col justify-between px-6 pb-4 md:border-[#121212]/15 md:border-t md:pb-6 lg:min-h-[440px] lg:border-t-0 lg:px-10">
+                <div className="flex flex-col justify-between px-6 pb-4 md:border-[#121212]/15 md:border-t md:pb-6 lg:min-h-[320px] lg:border-t-0 lg:px-10">
                   <div>
                     {/* ── HEADER STRIP (stays visible when the next card stacks on top) ── */}
                     <div className="hidden items-center font-bold font-metropolis text-[#261CC1] text-[0.75rem] uppercase tracking-[0.18em] md:flex md:h-14 lg:h-[76px] lg:text-[0.8rem]">
@@ -253,33 +220,15 @@ export function SolutionsStack() {
                       </h3>
                     </div>
 
-                    {/* ── DESCRIPTION & DETAILS (100% hidden by next card when stacked) ── */}
-                    <div className="pt-2 md:pt-4 lg:pt-5">
-                      <p className="m-0 max-w-[680px] font-metropolis text-[#121212]/75 text-[0.86rem] leading-[1.55] max-md:line-clamp-2 md:text-[0.88rem] md:leading-[1.6] lg:text-[0.94rem]">
-                        {item.description}
-                      </p>
-
-                      {/* What you get callout */}
-                      <div className="mt-3 max-w-[680px] border-[#121212]/10 border-y border-r border-l-2 border-l-[#261CC1] bg-white/70 px-3 py-2.5 md:mt-4 md:p-3.5 lg:p-4">
-                        <div className="text-[0.66rem] font-bold uppercase tracking-[0.16em] text-[#261CC1] mb-1 font-metropolis">
-                          What you get
-                        </div>
-                        <p className="m-0 font-medium font-metropolis text-[#121212] text-[0.82rem] leading-[1.45] md:text-[0.85rem] md:leading-[1.5] lg:text-[0.9rem]">
-                          {item.benefit}
-                        </p>
-                      </div>
-
-                      {/* Systems for SEO only (accessible to crawlers, hidden from visual screen) */}
-                      <div className="sr-only" aria-hidden="false">
-                        <h4>Systems and Scope:</h4>
-                        <p>{item.systems.join(" · ")}</p>
-                      </div>
-                    </div>
+                    {/* ── BENEFIT LINE (hidden by the next card when stacked) ── */}
+                    <p className="m-0 max-w-[680px] pt-2 font-metropolis text-[#121212]/75 text-[0.88rem] leading-[1.55] md:pt-4 lg:pt-5 lg:text-[0.98rem]">
+                      {item.benefit}
+                    </p>
                   </div>
 
                   {/* Lower action */}
                   <div className="pt-3 md:pt-5 md:pb-2">
-                    <ButtonZoomIn href={item.href} label="Learn more" />
+                    <ButtonZoomIn href={item.href} label="See full scope" />
                   </div>
                 </div>
               </div>

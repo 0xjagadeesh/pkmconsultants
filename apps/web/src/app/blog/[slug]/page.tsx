@@ -4,14 +4,14 @@ import { sanityFetch } from "@workspace/sanity/live";
 import { queryBlogPaths, queryBlogSlugPageData } from "@workspace/sanity/query";
 import { notFound } from "next/navigation";
 
+import { LineButton } from "@/components/blocks/line-button";
+import { PageCta } from "@/components/blocks/page-cta";
+import { type HeroMeta, PageHero } from "@/components/blocks/page-hero";
+import { SectionLabel } from "@/components/blocks/section-label";
 import { RichText } from "@/components/elements/rich-text";
 import { SanityImage } from "@/components/elements/sanity-image";
 import { TableOfContent } from "@/components/elements/table-of-content";
 import { ArticleJsonLd } from "@/components/json-ld";
-import { type HeroMeta, PageHero } from "@/components/blocks/page-hero";
-import { PageCta } from "@/components/blocks/page-cta";
-import { SectionLabel } from "@/components/blocks/section-label";
-import { LineButton } from "@/components/blocks/line-button";
 import { getSEOMetadata } from "@/lib/seo";
 
 const logger = new Logger("BlogSlug");

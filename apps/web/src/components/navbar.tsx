@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -429,6 +429,13 @@ const NAV_TONE_VARS: Record<NavTone, Record<string, string>> = {
   },
 };
 
+/** Frosted backdrop once the page has scrolled, tinted to match the tone. */
+const NAV_BACKDROP: Record<NavTone, string> = {
+  light: "border-[#121212]/10 bg-[#f7fbff]/80",
+  dark: "border-white/10 bg-[#0d0c11]/70",
+  brand: "border-white/15 bg-[#261CC1]/75",
+};
+
 /** Strongly blue surface (e.g. #261CC1) rather than black / grey. */
 const isBlueSurface = (r: number, g: number, b: number) =>
   b - Math.max(r, g) > 80;
@@ -456,6 +463,7 @@ export function Navbar() {
   const isHome = pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [tone, setTone] = useState<NavTone>("light");
+  const [scrolled, setScrolled] = useState(false);
 
   // Close menu on route change
   // biome-ignore lint/correctness/useExhaustiveDependencies: route change trigger
@@ -559,6 +567,24 @@ export function Navbar() {
     };
   }, [isHome]);
 
+  /* ── 1b. Frosted backdrop once scrolled. Home waits until the big logo
+         has finished shrinking, so the bar never cuts across it. ── */
+  useEffect(() => {
+    const threshold = () => {
+      if (!isHome) return 8;
+      const shrinkEnd = window.innerWidth < 1024 ? 0.3 : SHRINK_END;
+      return window.innerHeight * shrinkEnd;
+    };
+    const onScroll = () => setScrolled(window.scrollY >= threshold());
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [isHome]);
+
   /* ── 2. Tone: light text over dark sections (incl. the transition layer) ── */
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-probe on route change
   useEffect(() => {
@@ -659,7 +685,15 @@ export function Navbar() {
         {/*
           Desktop & Mobile: Flexbox layout
         */}
-        <div className="flex justify-between items-center h-14 lg:h-28 px-5 lg:px-10">
+        {/* Frosted backdrop: sits behind the bar only, so the probe still
+            reads the section underneath and the logo can overhang it */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-x-0 top-0 h-14 border-b backdrop-blur-md transition-[opacity,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:h-28 ${NAV_BACKDROP[tone]} ${
+            scrolled ? "opacity-100" : "opacity-0"
+          }`}
+        />
+        <div className="relative flex justify-between items-center h-14 lg:h-28 px-5 lg:px-10">
           {/* LEFT — Logo */}
           <Link
             href="/"

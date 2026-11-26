@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
+import { useEffect, useRef } from "react";
+
 import { MOTION_OK } from "@/lib/motion";
 import { ButtonZoomIn } from "./buttonzoomin";
 
@@ -19,7 +20,7 @@ interface PrefooterProps {
 }
 
 export function Prefooter({
-  description = "Tell us about your commercial, industrial or high-rise project and we will advise on the right MEP design scope, from HVAC, electrical, plumbing and fire protection to NBC and NFPA compliance, based on your design goals, budget and timelines.",
+  description = "Tell us about your project and we will advise on the right MEP design scope for your goals, budget and timeline.",
   titleLine1 = "Start your project with",
   titleLine2 = "reliable MEP design",
   buttonLabel = "Contact",

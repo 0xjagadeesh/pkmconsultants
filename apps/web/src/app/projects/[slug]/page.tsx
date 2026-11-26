@@ -2,14 +2,15 @@ import { Logger } from "@workspace/logger";
 import { client } from "@workspace/sanity/client";
 import { sanityFetch } from "@workspace/sanity/live";
 import { queryProjectBySlug, queryProjectPaths } from "@workspace/sanity/query";
-import { notFound } from "next/navigation";
-import { LineButton } from "@/components/blocks/line-button";
-import { SanityImage } from "@/components/elements/sanity-image";
-import { RichText } from "@/components/elements/rich-text";
-import { type HeroMeta, PageHero } from "@/components/blocks/page-hero";
-import { PageCta } from "@/components/blocks/page-cta";
-import { SectionLabel } from "@/components/blocks/section-label";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+import { LineButton } from "@/components/blocks/line-button";
+import { PageCta } from "@/components/blocks/page-cta";
+import { type HeroMeta, PageHero } from "@/components/blocks/page-hero";
+import { SectionLabel } from "@/components/blocks/section-label";
+import { RichText } from "@/components/elements/rich-text";
+import { SanityImage } from "@/components/elements/sanity-image";
 
 const logger = new Logger("ProjectSlug");
 

@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+
 import { DESKTOP_MOTION, MOBILE_MOTION, REDUCED_MOTION } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -148,10 +149,8 @@ export function MepfExplode() {
           </h2>
 
           <p className="m-0 max-w-[380px] font-medium font-metropolis text-[clamp(0.875rem,1.05vw,0.92rem)] text-[rgb(200,218,240)] leading-[1.76]">
-            We engineer every hidden mechanical, electrical, plumbing, and fire
-            system with precision, ensuring your building performs flawlessly
-            while keeping every line, space, and detail exactly as you first
-            envisioned it.
+            We engineer every hidden mechanical, electrical, plumbing and fire
+            system so your building performs exactly as you envisioned it.
           </p>
         </div>
 

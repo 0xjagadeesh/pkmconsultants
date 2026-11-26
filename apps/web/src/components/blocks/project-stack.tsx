@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+
 import { CoordinateField } from "@/components/blocks/coordinate-field";
 
 export type ProjectRow = {

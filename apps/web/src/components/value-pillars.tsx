@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { MaskRevealText } from "./mask-reveal-text";
+
 import { ButtonZoomIn } from "./buttonzoomin";
+import { MaskRevealText } from "./mask-reveal-text";
 
 export interface ValuePillarItem {
   id: string;
@@ -31,7 +32,7 @@ const DEFAULT_PILLARS: ValuePillarItem[] = [
     id: "energy-efficiency",
     title: "Lower Operating Costs",
     description:
-      "Accurate HVAC load calculations and right-sized systems cut wasted energy and support IGBC, LEED and ECBC requirements.",
+      "Accurate load calculations and right-sized systems cut wasted energy and support green building certification.",
     href: "/projects",
     buttonLabel: "View sustainable projects",
     image: "/images/electrical.jpg",
@@ -42,12 +43,11 @@ const DEFAULT_PILLARS: ValuePillarItem[] = [
     id: "approvals-safety",
     title: "Faster Approvals",
     description:
-      "NBC and NFPA-compliant drawings with clear documentation help you secure fire and statutory approvals sooner.",
+      "Code-compliant drawings with clear documentation help you secure fire and statutory approvals sooner.",
     href: "/contact",
     buttonLabel: "Discuss your project",
     image: "/images/fps.webp",
-    imageAlt:
-      "Engineer reviewing NFPA-compliant fire protection sprinkler layout drawings",
+    imageAlt: "Engineer reviewing fire protection sprinkler layout drawings",
   },
 ];
 

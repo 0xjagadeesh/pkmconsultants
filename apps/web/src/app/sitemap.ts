@@ -3,11 +3,21 @@ import { querySitemapData } from "@workspace/sanity/query";
 import type { QuerySitemapDataResult } from "@workspace/sanity/types";
 import type { MetadataRoute } from "next";
 
+import { SCOPE_OF_SERVICES } from "@/data/pkm-portfolio";
 import { getBaseUrl } from "@/utils";
 
 type Page = QuerySitemapDataResult["slugPages"][number];
 
 const baseUrl = getBaseUrl();
+
+/** Code-defined routes that are not Sanity pages. */
+const STATIC_PATHS = [
+  "/about",
+  "/services",
+  ...SCOPE_OF_SERVICES.map((service) => `/services/${service.slug}`),
+  "/projects",
+  "/contact",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { slugPages, blogPages } = await client.fetch(querySitemapData);
@@ -18,6 +28,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     },
+    ...STATIC_PATHS.map((path) => ({
+      url: `${baseUrl}${path}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: path.startsWith("/services") ? 0.9 : 0.7,
+    })),
     ...slugPages.map((page: Page) => ({
       url: `${baseUrl}${page.slug}`,
       lastModified: new Date(page.lastModified ?? new Date()),

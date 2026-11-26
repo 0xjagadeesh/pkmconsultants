@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import type { SectionTone } from "@/components/blocks/section-label";
 
 type LineButtonProps = {

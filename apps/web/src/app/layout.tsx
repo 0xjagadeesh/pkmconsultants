@@ -1,8 +1,8 @@
 import "@workspace/ui/globals.css";
 
 import { SanityLive } from "@workspace/sanity/live";
-import { draftMode } from "next/headers";
 import type { Metadata } from "next";
+import { draftMode } from "next/headers";
 import { VisualEditing } from "next-sanity/visual-editing";
 
 import { Footer } from "@/components/footer";

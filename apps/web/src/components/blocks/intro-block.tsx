@@ -1,4 +1,6 @@
-import { CrosshairImage } from "@/components/blocks/crosshair-image";
+import Image from "next/image";
+
+import { LineButton } from "@/components/blocks/line-button";
 import {
   SectionLabel,
   type SectionTone,
@@ -14,6 +16,8 @@ type IntroBlockProps = {
   /** Supporting paragraphs */
   body?: string[];
   image?: { src: string; alt: string };
+  /** Optional one-line link under the body */
+  link?: { href: string; label: string };
   tone?: SectionTone;
 };
 
@@ -26,6 +30,7 @@ export function IntroBlock({
   statement,
   body = [],
   image,
+  link,
   tone = "light",
 }: IntroBlockProps) {
   const border = TONE_BORDER[tone];
@@ -38,9 +43,9 @@ export function IntroBlock({
           <SectionLabel tone={tone}>{label}</SectionLabel>
         </div>
         <div className="px-6 pb-12 sm:px-10 lg:px-12 lg:py-16">
-          <p className="m-0 max-w-[30ch] font-metropolis font-medium text-[clamp(1.5rem,3vw,2.4rem)] leading-[1.2] tracking-[-0.02em]">
+          <h2 className="m-0 max-w-[30ch] font-metropolis font-medium text-[clamp(1.5rem,3vw,2.4rem)] leading-[1.2] tracking-[-0.02em]">
             {statement}
-          </p>
+          </h2>
           {body.length > 0 ? (
             <div className="mt-8 grid max-w-[900px] gap-6 md:grid-cols-2">
               {body.map((paragraph) => (
@@ -53,6 +58,14 @@ export function IntroBlock({
               ))}
             </div>
           ) : null}
+          {link ? (
+            <LineButton
+              className="mt-8"
+              href={link.href}
+              label={link.label}
+              tone={tone}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -60,11 +73,12 @@ export function IntroBlock({
         <div
           className={`relative aspect-[16/9] border-t sm:aspect-[21/9] ${border}`}
         >
-          <CrosshairImage
+          <Image
             alt={image.alt}
+            className="rounded-none bg-[#dedcff]/30 object-cover"
+            fill
             sizes="100vw"
             src={image.src}
-            tone={tone === "light" ? "light" : "dark"}
           />
         </div>
       ) : null}

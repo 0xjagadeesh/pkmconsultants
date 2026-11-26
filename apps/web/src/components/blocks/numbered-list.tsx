@@ -1,3 +1,4 @@
+import { LineButton } from "@/components/blocks/line-button";
 import {
   SectionLabel,
   type SectionTone,
@@ -13,6 +14,8 @@ export type NumberedItem = {
   points?: string[];
   /** Optional small tag shown above the title */
   tag?: string;
+  /** Short codes (NBC, NFPA…) rendered as square tags */
+  tags?: string[];
 };
 
 type NumberedListProps = {
@@ -24,6 +27,8 @@ type NumberedListProps = {
   id?: string;
   /** Optional anchor id per row (for in-page links) */
   itemId?: (index: number) => string;
+  /** Optional one-line link under the heading */
+  link?: { href: string; label: string };
 };
 
 /**
@@ -38,6 +43,7 @@ export function NumberedList({
   tone = "light",
   id,
   itemId,
+  link,
 }: NumberedListProps) {
   const border = TONE_BORDER[tone];
   const muted = TONE_MUTED[tone];
@@ -57,6 +63,14 @@ export function NumberedList({
               >
                 {intro}
               </p>
+            ) : null}
+            {link ? (
+              <LineButton
+                className="mt-8"
+                href={link.href}
+                label={link.label}
+                tone={tone}
+              />
             ) : null}
           </div>
         </div>
@@ -107,6 +121,22 @@ export function NumberedList({
                           }`}
                         />
                         <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {item.tags && item.tags.length > 0 ? (
+                  <ul className="m-0 mt-5 flex list-none flex-wrap gap-2 p-0">
+                    {item.tags.map((code) => (
+                      <li
+                        className={`rounded-none border px-2.5 py-1 font-bold font-mosvita text-[0.7rem] uppercase tracking-[0.14em] ${
+                          tone === "light"
+                            ? "border-[#261CC1]/40 text-[#261CC1]"
+                            : "border-white/40 text-white"
+                        }`}
+                        key={code}
+                      >
+                        {code}
                       </li>
                     ))}
                   </ul>

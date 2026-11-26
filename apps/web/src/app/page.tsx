@@ -2,15 +2,14 @@ import { Logger } from "@workspace/logger";
 import { sanityFetch } from "@workspace/sanity/live";
 import { queryBlogIndexPageBlogs } from "@workspace/sanity/query";
 import type { Metadata } from "next";
+
 import { AnimatedCTAButton } from "@/components/animated-cta-button";
 import { BuildingParallax } from "@/components/building-parallax";
 import { CursorTracker } from "@/components/cursor-tracker";
 import { HomeBlogSection } from "@/components/home-blog-section";
-import { ImageParallaxSection } from "@/components/image-parallax-section";
 import { MatrixSection } from "@/components/matrix-section";
 import { MepfExplode } from "@/components/mepf-explode";
 import { Prefooter } from "@/components/prefooter";
-import { ScrollRevealSplit } from "@/components/scroll-reveal-split";
 import { SolutionsStack } from "@/components/solutions-stack";
 import { SplitWordReveal } from "@/components/split-word-reveal";
 import { ValuePillars } from "@/components/value-pillars";
@@ -124,11 +123,6 @@ export default async function HomePage() {
       <BuildingParallax />
 
       {/* ══════════════════════════════════════════
-          SCROLL REVEAL SPLIT — two-column image reveal
-      ══════════════════════════════════════════ */}
-      <ScrollRevealSplit />
-
-      {/* ══════════════════════════════════════════
           MEPF EXPLODED VIEW — scroll-triggered 3D
       ══════════════════════════════════════════ */}
       <MepfExplode />
@@ -139,34 +133,16 @@ export default async function HomePage() {
       <SolutionsStack />
 
       {/* ══════════════════════════════════════════
-          IMAGE PARALLAX BANNER — Construction structure
-      ══════════════════════════════════════════ */}
-      <ImageParallaxSection
-        image="/images/metal-structure.jpg"
-        alt="Metal structure on a construction site"
-      />
-
-      {/* ══════════════════════════════════════════
           VALUE PILLARS — System guarantees accordion
       ══════════════════════════════════════════ */}
       <ValuePillars />
 
-      <MatrixSection
-        title={["A consistent design", "process on every project"]}
-        description="Every project follows the same design workflow: load calculations, coordinated drawings, internal quality checks code compliance review. This keeps drawings consistent, makes revisions traceable, and lets us deliver commercial, industrial and high-rise projects to the same standard."
-        link="/contact"
-        linkLabel="Request a consultation"
-        imageUrl="/images/archi.webp"
-        imageAlt="MEP engineer reviewing coordinated HVAC, electrical and plumbing drawings"
-        imagePosition="left"
-      />
-
       {/* ══════════════════════════════════════════
-    MATRIX SPLIT 2 - Experience (Image on Right)
+    PROVEN EXPERIENCE — single home for this block (image right)
 ══════════════════════════════════════════ */}
       <MatrixSection
         title="Proven Project Experience"
-        description="Our MEP and fire protection designs are delivered on commercial, industrial and high-rise buildings across India, from concept design to approval-ready drawings and site support."
+        description="MEP and fire protection designs for commercial, industrial and high-rise buildings across India, from concept to site support."
         link="/projects"
         linkLabel="View our projects"
         imageUrl="/images/building-1.jpg"

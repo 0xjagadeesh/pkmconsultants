@@ -1,8 +1,9 @@
 import { Logger } from "@workspace/logger";
-import { sanityFetch } from "@workspace/sanity/live";
 import { SANITY_BASE_URL } from "@workspace/sanity/image";
+import { sanityFetch } from "@workspace/sanity/live";
 import { queryAllProjects } from "@workspace/sanity/query";
 import type { Metadata } from "next";
+
 import { PageCta } from "@/components/blocks/page-cta";
 import {
   type ProjectRow,
