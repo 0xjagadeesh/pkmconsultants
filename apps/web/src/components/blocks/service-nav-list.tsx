@@ -59,8 +59,8 @@ type ServiceNavListProps = {
 const EASE = "ease-[cubic-bezier(0.16,1,0.3,1)]";
 
 /**
- * Dark index of links (e.g. "next service"). A white highlight slides to the
- * hovered / focused row, its label rolls and turns dark, its icon square
+ * Light index of links (e.g. "next service"). A brand-blue highlight slides to
+ * the hovered / focused row, its label rolls and turns white, its icon square
  * inverts with a rolling glyph, and the other rows dim.
  * Touch devices get plain rows (no hover), still fully tappable.
  */
@@ -85,14 +85,14 @@ export function ServiceNavList({
 
   return (
     <section
-      className="border-white/15 border-b bg-[#0d0c11] text-white"
-      data-nav-tone="dark"
+      className="border-[#121212]/15 border-b bg-[#f7fbff] text-[#121212]"
+      data-nav-tone="light"
       id={id}
     >
       {/* Heading */}
       <div className="px-6 pt-14 pb-12 sm:px-10 lg:px-10 lg:pt-24 lg:pb-20">
-        <SectionLabel tone="dark">{label}</SectionLabel>
-        <h2 className="m-0 mt-6 font-extrabold font-metropolis text-[#7b73ff] text-[clamp(2rem,5vw,4rem)] leading-[1.04] tracking-[-0.035em]">
+        <SectionLabel>{label}</SectionLabel>
+        <h2 className="m-0 mt-6 font-extrabold font-metropolis text-[#121212] text-[clamp(2rem,5vw,4rem)] leading-[1.04] tracking-[-0.035em]">
           {lines.map((line) => (
             <span className="block" key={line}>
               {line}
@@ -104,13 +104,13 @@ export function ServiceNavList({
       {/* Rows */}
       <nav aria-label={lines.join(" ")}>
         <ul
-          className="relative m-0 list-none border-white/15 border-t p-0"
+          className="relative m-0 list-none border-[#121212]/15 border-t p-0"
           onMouseLeave={() => setActive(null)}
         >
           {/* Sliding highlight (pointer devices only) */}
           <li
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-x-0 top-0 hidden bg-[#f7fbff] transition-[transform,height,opacity] duration-500 motion-reduce:transition-none pointer-fine:block ${EASE} ${
+            className={`pointer-events-none absolute inset-x-0 top-0 hidden bg-[#261CC1] transition-[transform,height,opacity] duration-500 motion-reduce:transition-none pointer-fine:block ${EASE} ${
               active === null ? "opacity-0" : "opacity-100"
             }`}
             style={{
@@ -131,7 +131,7 @@ export function ServiceNavList({
                 }}
               >
                 <Link
-                  className={`group grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-white/15 border-b px-6 py-4 no-underline outline-none transition-opacity duration-300 focus-visible:ring-2 focus-visible:ring-[#7b73ff] focus-visible:ring-inset sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5 ${EASE} ${
+                  className={`group grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-[#121212]/15 border-b px-6 py-4 no-underline outline-none transition-opacity duration-300 focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5 ${EASE} ${
                     isDimmed ? "opacity-40" : "opacity-100"
                   }`}
                   data-active={isActive}
@@ -142,7 +142,7 @@ export function ServiceNavList({
                 >
                   {/* Number */}
                   <span
-                    className={`font-bold font-metropolis text-[#7b73ff] text-[1.1rem] tracking-tight transition-colors duration-300 group-data-[active=true]:text-[#121212] lg:text-[clamp(1.4rem,2.4vw,2.4rem)] ${EASE}`}
+                    className={`font-bold font-metropolis text-[#121212] text-[1.1rem] tracking-tight transition-colors duration-300 group-data-[active=true]:text-[#f7fbff] lg:text-[clamp(1.4rem,2.4vw,2.4rem)] ${EASE}`}
                   >
                     {item.number}
                     <span className="ml-2 lg:ml-3">/</span>
@@ -151,22 +151,22 @@ export function ServiceNavList({
                   {/* Title with roll-up on activate */}
                   <span className="relative block overflow-hidden font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
                     <span
-                      className={`block text-[#7b73ff] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:-translate-y-full ${EASE}`}
+                      className={`block text-[#121212] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:-translate-y-full ${EASE}`}
                     >
                       {item.title}
                     </span>
                     <span
                       aria-hidden="true"
-                      className={`absolute inset-x-0 top-0 block translate-y-full text-[#121212] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:translate-y-0 ${EASE}`}
+                      className={`absolute inset-x-0 top-0 block translate-y-full text-[#f7fbff] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:translate-y-0 ${EASE}`}
                     >
                       {item.title}
                     </span>
                   </span>
 
-                  {/* Icon square: grey → obsidian, glyph rolls diagonally */}
+                  {/* Icon square: tint → white, glyph rolls diagonally */}
                   <span
                     aria-hidden="true"
-                    className={`relative flex size-11 items-center justify-center overflow-hidden bg-white/10 text-white/50 transition-colors duration-300 group-data-[active=true]:bg-[#121212] group-data-[active=true]:text-[#7b73ff] lg:size-16 ${EASE}`}
+                    className={`relative flex size-11 items-center justify-center overflow-hidden bg-[#121212]/[0.06] text-[#121212]/60 transition-colors duration-300 group-data-[active=true]:bg-[#f7fbff] group-data-[active=true]:text-[#261CC1] lg:size-16 ${EASE}`}
                   >
                     <span
                       className={`absolute transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:translate-x-[150%] group-data-[active=true]:-translate-y-[150%] ${EASE}`}
