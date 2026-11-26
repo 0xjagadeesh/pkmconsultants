@@ -1,14 +1,9 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@workspace/ui/components/accordion";
 import { Badge } from "@workspace/ui/components/badge";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import type { PagebuilderType } from "@/types";
+import { FixedAccordion } from "../elements/fixed-accordion";
 import { RichText } from "../elements/rich-text";
 import { FaqJsonLd } from "../json-ld";
 
@@ -35,30 +30,23 @@ export function FaqAccordion({
           </div>
         </div>
         <div className="mx-auto my-16 max-w-xl">
-          <Accordion
-            className="w-full"
-            collapsible
-            defaultValue="3"
-            type="single"
-          >
-            {faqs?.map((faq, index) => (
-              <AccordionItem
-                className="py-2"
-                key={`AccordionItem-${faq?._id}-${index}`}
-                value={faq?._id}
-              >
-                <AccordionTrigger className="group py-2 text-[15px] leading-6 hover:no-underline">
-                  {faq?.title}
-                </AccordionTrigger>
-                <AccordionContent className="pb-2 text-muted-foreground">
-                  <RichText
-                    className="text-sm md:text-base"
-                    richText={faq?.richText ?? []}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <FixedAccordion
+            answerClassName="pb-4 text-muted-foreground"
+            iconClassName="size-3.5"
+            itemClassName="border-b"
+            items={(faqs ?? []).map((faq, index) => ({
+              id: faq?._id ?? String(index),
+              question: faq?.title,
+              answer: (
+                <RichText
+                  className="text-sm md:text-base"
+                  richText={faq?.richText ?? []}
+                />
+              ),
+            }))}
+            questionClassName="font-medium text-[15px] leading-6"
+            triggerClassName="flex items-center justify-between gap-4 py-4"
+          />
 
           {link?.href && (
             <div className="w-full py-6">

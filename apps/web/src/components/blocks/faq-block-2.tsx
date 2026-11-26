@@ -1,4 +1,5 @@
 import type { FaqItem } from "@/components/blocks/faq-block";
+import { FixedAccordion } from "@/components/elements/fixed-accordion";
 import { ImageClipReveal } from "@/components/image-clip-reveal";
 
 type FaqBlock2Tone = "light" | "dark";
@@ -51,8 +52,9 @@ const TONES: Record<
 
 /**
  * Split FAQ: crosshair image reveal on the left, accordion on the right
- * (Enerblock "FAQs" pattern). Native <details> keeps it accessible and
- * collapsed by default without JavaScript. Mirror `items` in FAQPage schema.
+ * (Enerblock "FAQs" pattern). Single-open accordion, first answer open, and
+ * the section height never changes (see FixedAccordion). Mirror `items` in
+ * FAQPage schema.
  * The original FaqBlock stays available for text-only FAQ sections.
  */
 export function FaqBlock2({
@@ -104,33 +106,18 @@ export function FaqBlock2({
           </div>
 
           <div className="lg:mt-auto lg:mb-[clamp(3rem,10vh,8rem)]">
-            {items.map((item) => (
-              <details
-                className={`group border-b ${t.border} first:border-t-0`}
-                key={item.question}
-              >
-                <summary className="flex min-h-11 cursor-pointer list-none items-start justify-between gap-6 px-6 py-6 sm:px-10 lg:px-8 lg:py-7 [&::-webkit-details-marker]:hidden">
-                  <span
-                    className={`max-w-[46ch] font-metropolis font-medium text-[1.15rem] leading-[1.3] tracking-[-0.015em] lg:text-[clamp(1.25rem,1.9vw,1.75rem)] ${t.accent}`}
-                  >
-                    {item.question}
-                  </span>
-                  {/* Plus → minus drafting icon */}
-                  <span
-                    aria-hidden="true"
-                    className={`relative mt-1 flex size-7 shrink-0 items-center justify-center lg:size-8 ${t.accent}`}
-                  >
-                    <span className="absolute h-[1.5px] w-full bg-current" />
-                    <span className="absolute h-full w-[1.5px] bg-current transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-open:scale-y-0" />
-                  </span>
-                </summary>
-                <p
-                  className={`m-0 max-w-[60ch] px-6 pb-7 text-[1rem] leading-[1.7] sm:px-10 lg:px-8 ${t.muted}`}
-                >
-                  {item.answer}
-                </p>
-              </details>
-            ))}
+            <FixedAccordion
+              answerClassName={`max-w-[60ch] px-6 pb-7 text-[1rem] leading-[1.7] sm:px-10 lg:px-8 ${t.muted}`}
+              iconClassName={`mt-1 size-7 lg:size-8 ${t.accent}`}
+              itemClassName={`border-b ${t.border}`}
+              items={items.map((item) => ({
+                id: item.question,
+                question: item.question,
+                answer: item.answer,
+              }))}
+              questionClassName={`max-w-[46ch] font-metropolis font-medium text-[1.15rem] leading-[1.3] tracking-[-0.015em] lg:text-[clamp(1.25rem,1.9vw,1.75rem)] ${t.accent}`}
+              triggerClassName="flex min-h-11 items-start justify-between gap-6 px-6 py-6 sm:px-10 lg:px-8 lg:py-7"
+            />
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import {
   TONE_MUTED,
   TONE_SURFACE,
 } from "@/components/blocks/section-label";
+import { FixedAccordion } from "@/components/elements/fixed-accordion";
 
 export type FaqItem = { question: string; answer: string };
 
@@ -16,8 +17,8 @@ type FaqBlockProps = {
 };
 
 /**
- * Questions on the architectural grid. Native <details> keeps it accessible
- * and works without JavaScript.
+ * Questions on the architectural grid. Single-open accordion, first answer
+ * open, and the section height never changes (see FixedAccordion).
  */
 export function FaqBlock({
   label = "FAQs",
@@ -38,33 +39,18 @@ export function FaqBlock({
           </h2>
         </div>
 
-        <div>
-          {items.map((item, i) => (
-            <details
-              className={`group border-t ${border} ${i === 0 ? "lg:border-t-0" : ""}`}
-              key={item.question}
-            >
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 px-6 py-6 sm:px-10 lg:px-12 [&::-webkit-details-marker]:hidden">
-                <span className="font-metropolis font-semibold text-[1.05rem] leading-[1.35] lg:text-[1.2rem]">
-                  {item.question}
-                </span>
-                {/* Plus / minus drafting icon */}
-                <span
-                  aria-hidden="true"
-                  className="relative flex size-5 shrink-0 items-center justify-center"
-                >
-                  <span className="absolute h-[1.5px] w-4 bg-current" />
-                  <span className="absolute h-4 w-[1.5px] bg-current transition-transform duration-300 group-open:scale-y-0" />
-                </span>
-              </summary>
-              <p
-                className={`m-0 max-w-[70ch] px-6 pb-8 text-[0.98rem] leading-[1.7] sm:px-10 lg:px-12 ${TONE_MUTED[tone]}`}
-              >
-                {item.answer}
-              </p>
-            </details>
-          ))}
-        </div>
+        <FixedAccordion
+          answerClassName={`m-0 max-w-[70ch] px-6 pb-8 text-[0.98rem] leading-[1.7] sm:px-10 lg:px-12 ${TONE_MUTED[tone]}`}
+          iconClassName="size-5"
+          itemClassName={`border-t ${border} lg:first:border-t-0`}
+          items={items.map((item) => ({
+            id: item.question,
+            question: item.question,
+            answer: item.answer,
+          }))}
+          questionClassName="font-metropolis font-semibold text-[1.05rem] leading-[1.35] lg:text-[1.2rem]"
+          triggerClassName="flex min-h-11 items-center justify-between gap-6 px-6 py-6 sm:px-10 lg:px-12"
+        />
       </div>
     </section>
   );
