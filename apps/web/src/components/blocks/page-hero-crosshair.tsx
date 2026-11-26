@@ -1,5 +1,6 @@
 import { SectionLabel } from "@/components/blocks/section-label";
 import { Crosshair } from "@/components/crosshair";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 type PageHeroCrosshairProps = {
   /** Small label above the title */
@@ -31,14 +32,13 @@ export function PageHeroCrosshair({
             {eyebrow ? (
               <SectionLabel className="mb-6">{eyebrow}</SectionLabel>
             ) : null}
-            <h1 className="fade-in slide-in-from-bottom-4 m-0 animate-in fill-mode-both font-extrabold font-metropolis text-[clamp(2.4rem,4.4vw,4.6rem)] leading-[0.98] tracking-[-0.045em] duration-700">
-              {lines.map((line, i) => (
-                <span className="block" key={line}>
-                  {line}
-                  {i < lines.length - 1 ? " " : ""}
-                </span>
-              ))}
-            </h1>
+            <MaskRevealText
+              as="h1"
+              className="m-0 font-extrabold font-metropolis text-[clamp(2.4rem,4.4vw,4.6rem)] leading-[0.98] tracking-[-0.045em]"
+              delay={0.15}
+              lines={lines}
+              scrollTrigger={false}
+            />
           </div>
           {intro ? (
             <p className="fade-in slide-in-from-bottom-2 m-0 max-w-[40ch] animate-in fill-mode-both font-metropolis font-medium text-[clamp(1.1rem,1.7vw,1.6rem)] leading-[1.3] tracking-[-0.015em] delay-200 duration-700">

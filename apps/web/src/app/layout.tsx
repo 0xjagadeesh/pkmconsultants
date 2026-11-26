@@ -74,6 +74,10 @@ export default async function RootLayout({
           type="font/otf"
           crossOrigin="anonymous"
         />
+        {/* MaskRevealText starts hidden; show it when JavaScript is off */}
+        <noscript>
+          <style>{"[data-mask-text]{opacity:1!important}"}</style>
+        </noscript>
       </head>
       {/*
         No Next.js font variables needed — Metropolis is loaded via @font-face

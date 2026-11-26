@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Crosshair } from "@/components/crosshair";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 export type ProjectRow = {
   id: string;
@@ -146,9 +147,13 @@ export function ProjectStack({
       {/* ── Header: title + hover crosshair ── */}
       <div className="grid grid-cols-1 border-[#121212]/15 border-b lg:grid-cols-2">
         <div className="flex min-h-[300px] flex-col justify-between gap-12 px-6 pt-28 pb-8 sm:px-10 lg:min-h-[480px] lg:border-[#121212]/15 lg:border-r lg:px-4 lg:pt-36 lg:pb-9 xl:px-5">
-          <h1 className="fade-in slide-in-from-bottom-4 m-0 animate-in fill-mode-both font-extrabold font-metropolis text-[clamp(3.2rem,7vw,6rem)] leading-[0.95] tracking-[-0.045em] duration-700">
-            {title}
-          </h1>
+          <MaskRevealText
+            as="h1"
+            className="m-0 font-extrabold font-metropolis text-[clamp(3.2rem,7vw,6rem)] leading-[0.95] tracking-[-0.045em]"
+            delay={0.15}
+            scrollTrigger={false}
+            text={title}
+          />
           <p className="m-0 max-w-[32ch] font-metropolis font-medium text-[clamp(1.25rem,2.2vw,2.1rem)] leading-[1.2] tracking-[-0.02em]">
             {subtitle}
           </p>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { LocationBlock, PKM_OFFICES } from "@/components/blocks/location-block";
 import { SectionLabel } from "@/components/blocks/section-label";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 import { ContactStepsForm } from "./_components/contact-steps-form";
 
 export const metadata: Metadata = {
@@ -21,9 +22,13 @@ export default function ContactPage() {
           <div className="flex flex-col justify-between gap-12 border-[#121212]/15 border-b px-6 pb-12 sm:px-10 lg:border-r lg:border-b-0 lg:px-10 lg:pb-16">
             <div>
               <SectionLabel>Contact</SectionLabel>
-              <h1 className="fade-in slide-in-from-bottom-4 m-0 mt-8 animate-in fill-mode-both font-extrabold font-metropolis text-[clamp(2.2rem,4.6vw,3.8rem)] leading-[1.04] tracking-[-0.035em] duration-700">
-                Tell us about your project
-              </h1>
+              <MaskRevealText
+                as="h1"
+                className="m-0 mt-8 font-extrabold font-metropolis text-[clamp(2.2rem,4.6vw,3.8rem)] leading-[1.04] tracking-[-0.035em]"
+                delay={0.15}
+                scrollTrigger={false}
+                text="Tell us about your project"
+              />
               <p className="m-0 mt-8 max-w-[40ch] text-[#555555] text-[1.02rem] leading-[1.7]">
                 Share a few details and we will advise on the right MEPF design
                 scope, codes and timeline for your building.

@@ -6,6 +6,7 @@ import {
   TONE_MUTED,
   TONE_SURFACE,
 } from "@/components/blocks/section-label";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 export type NumberedItem = {
   title: string;
@@ -54,9 +55,10 @@ export function NumberedList({
         <div className={`lg:border-r ${border}`}>
           <div className="px-6 pt-12 pb-10 sm:px-10 lg:sticky lg:top-24 lg:px-10 lg:py-16">
             <SectionLabel tone={tone}>{label}</SectionLabel>
-            <h2 className="m-0 mt-6 max-w-[16ch] font-extrabold font-metropolis text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.08] tracking-[-0.03em]">
-              {title}
-            </h2>
+            <MaskRevealText
+              className="m-0 mt-6 max-w-[16ch] font-extrabold font-metropolis text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.08] tracking-[-0.03em]"
+              text={title}
+            />
             {intro ? (
               <p
                 className={`m-0 mt-6 max-w-[42ch] text-[1rem] leading-[1.7] ${muted}`}

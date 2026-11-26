@@ -5,6 +5,7 @@ import {
   TONE_MUTED,
   TONE_SURFACE,
 } from "@/components/blocks/section-label";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 export type PostItItem = {
   title: string;
@@ -45,9 +46,10 @@ export function PostItGrid({
           <SectionLabel tone={tone}>{label}</SectionLabel>
         </div>
         <div className="px-6 pb-10 sm:px-10 lg:px-12 lg:py-16">
-          <h2 className="m-0 max-w-[20ch] font-extrabold font-metropolis text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.08] tracking-[-0.03em]">
-            {title}
-          </h2>
+          <MaskRevealText
+            className="m-0 max-w-[20ch] font-extrabold font-metropolis text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.08] tracking-[-0.03em]"
+            text={title}
+          />
           {intro ? (
             <p
               className={`m-0 mt-6 max-w-[60ch] text-[1rem] leading-[1.7] ${muted}`}

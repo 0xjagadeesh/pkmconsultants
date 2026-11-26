@@ -8,6 +8,7 @@ import {
   TONE_MUTED,
   TONE_SURFACE,
 } from "@/components/blocks/section-label";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 export type HeroMeta = { label: string; value: string };
 
@@ -70,14 +71,13 @@ export function PageHero({
         </div>
 
         <div className="px-6 pt-8 pb-12 sm:px-10 lg:px-12 lg:pt-0 lg:pb-16">
-          <h1 className="fade-in slide-in-from-bottom-4 m-0 max-w-[18ch] animate-in fill-mode-both font-extrabold font-metropolis text-[clamp(2.2rem,5.2vw,4.4rem)] leading-[1.04] tracking-[-0.035em] duration-700">
-            {lines.map((line, i) => (
-              <span className="block" key={line}>
-                {line}
-                {i < lines.length - 1 ? " " : ""}
-              </span>
-            ))}
-          </h1>
+          <MaskRevealText
+            as="h1"
+            className="m-0 max-w-[18ch] font-extrabold font-metropolis text-[clamp(2.2rem,5.2vw,4.4rem)] leading-[1.04] tracking-[-0.035em]"
+            delay={0.15}
+            lines={lines}
+            scrollTrigger={false}
+          />
           {intro ? (
             <p
               className={`fade-in slide-in-from-bottom-2 m-0 mt-8 max-w-[60ch] animate-in fill-mode-both text-[1rem] leading-[1.7] delay-200 duration-700 sm:text-[1.08rem] ${TONE_MUTED[tone]}`}

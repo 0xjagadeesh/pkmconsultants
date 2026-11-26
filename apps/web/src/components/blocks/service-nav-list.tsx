@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { SectionLabel } from "@/components/blocks/section-label";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 /* ─────────────────────────────────────────────
    ICONS — square drafting glyphs per discipline
@@ -108,13 +109,10 @@ export function ServiceNavList({
       {/* Heading */}
       <div className="px-6 pt-14 pb-12 sm:px-10 lg:px-10 lg:pt-24 lg:pb-20">
         <SectionLabel>{label}</SectionLabel>
-        <h2 className="m-0 mt-6 font-extrabold font-metropolis text-[#121212] text-[clamp(2rem,5vw,4rem)] leading-[1.04] tracking-[-0.035em]">
-          {lines.map((line) => (
-            <span className="block" key={line}>
-              {line}
-            </span>
-          ))}
-        </h2>
+        <MaskRevealText
+          className="m-0 mt-6 font-extrabold font-metropolis text-[#121212] text-[clamp(2rem,5vw,4rem)] leading-[1.04] tracking-[-0.035em]"
+          lines={lines}
+        />
       </div>
 
       {/* Rows */}

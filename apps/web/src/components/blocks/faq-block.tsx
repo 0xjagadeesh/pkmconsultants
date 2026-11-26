@@ -6,6 +6,7 @@ import {
   TONE_SURFACE,
 } from "@/components/blocks/section-label";
 import { FixedAccordion } from "@/components/elements/fixed-accordion";
+import { MaskRevealText } from "@/components/mask-reveal-text";
 
 export type FaqItem = { question: string; answer: string };
 
@@ -34,9 +35,10 @@ export function FaqBlock({
           className={`px-6 pt-12 pb-8 sm:px-10 lg:border-r lg:px-10 lg:py-16 ${border}`}
         >
           <SectionLabel tone={tone}>{label}</SectionLabel>
-          <h2 className="m-0 mt-6 max-w-[16ch] font-extrabold font-metropolis text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.08] tracking-[-0.03em]">
-            {title}
-          </h2>
+          <MaskRevealText
+            className="m-0 mt-6 max-w-[16ch] font-extrabold font-metropolis text-[clamp(1.8rem,3.4vw,2.8rem)] leading-[1.08] tracking-[-0.03em]"
+            text={title}
+          />
         </div>
 
         <FixedAccordion
