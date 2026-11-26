@@ -6,6 +6,7 @@ import { IntroBlock } from "@/components/blocks/intro-block";
 import { PageCta } from "@/components/blocks/page-cta";
 import { PageHero } from "@/components/blocks/page-hero";
 import { PostItGrid } from "@/components/blocks/post-it-grid";
+import { ImageRevealCrosshair } from "@/components/image-reveal-crosshair";
 import { JsonLdScript } from "@/components/json-ld";
 import { SERVICE_FAQS } from "@/data/pkm-content";
 import { SCOPE_OF_SERVICES } from "@/data/pkm-portfolio";
@@ -65,6 +66,11 @@ export default function ServicesPage() {
         items={DISCIPLINES}
         label="Disciplines"
         title="What we design"
+      />
+
+      <ImageRevealCrosshair
+        alt="Building under construction with coordinated MEPF services"
+        src="/images/building-1.jpg"
       />
 
       <FaqBlock items={SERVICE_FAQS} title="Questions about our services" />
