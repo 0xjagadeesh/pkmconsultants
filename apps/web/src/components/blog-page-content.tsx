@@ -1,12 +1,13 @@
 "use client";
 
 import type { QueryBlogIndexPageDataResult } from "@workspace/sanity/types";
+
 import { BlogGrid, FeaturedBlogPost } from "@/components/blocks/blog-grid";
+import { PageCta } from "@/components/blocks/page-cta";
+import { PageHeroCrosshair } from "@/components/blocks/page-hero-crosshair";
+import { SectionLabel } from "@/components/blocks/section-label";
 import { BlogPagination } from "@/components/blog-pagination";
 import { PageBuilder } from "@/components/pagebuilder";
-import { PageHero } from "@/components/blocks/page-hero";
-import { PageCta } from "@/components/blocks/page-cta";
-import { SectionLabel } from "@/components/blocks/section-label";
 import { useBlogSearch } from "@/hooks/use-blog-search";
 import type { Blog } from "@/types";
 import type { PaginationMetadata } from "@/utils";
@@ -52,7 +53,7 @@ export function BlogPageContent({
 
   return (
     <>
-      <PageHero
+      <PageHeroCrosshair
         eyebrow="Blog"
         intro={description ?? undefined}
         title={title ?? "Insights from our engineers"}

@@ -4,7 +4,7 @@ import type { FAQPage, WithContext } from "schema-dts";
 import { FaqBlock } from "@/components/blocks/faq-block";
 import { IntroBlock } from "@/components/blocks/intro-block";
 import { PageCta } from "@/components/blocks/page-cta";
-import { PageHero } from "@/components/blocks/page-hero";
+import { PageHeroCrosshair } from "@/components/blocks/page-hero-crosshair";
 import { PostItGrid } from "@/components/blocks/post-it-grid";
 import { ImageRevealCrosshair } from "@/components/image-reveal-crosshair";
 import { JsonLdScript } from "@/components/json-ld";
@@ -39,7 +39,7 @@ export default function ServicesPage() {
     <>
       <JsonLdScript data={FAQ_JSON_LD} id="services-faq-json-ld" />
 
-      <PageHero
+      <PageHeroCrosshair
         eyebrow="Services"
         intro="One coordinated process for HVAC, plumbing, electrical, fire and ELV design, from load calculations to site support."
         title={[
