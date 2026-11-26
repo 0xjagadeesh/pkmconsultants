@@ -1,20 +1,13 @@
 "use client";
 
 import gsap from "gsap";
-import { type PointerEvent, useEffect, useRef } from "react";
+import { type PointerEvent, useRef } from "react";
 
 import { REDUCED_MOTION } from "@/lib/motion";
 
 export type CrosshairProps = {
   /** Light surfaces get dark lines; dark surfaces get light lines */
   theme?: "light" | "dark";
-  /**
-   * Resting point as fractions of the box (e.g. `[0.4, 0.62]`). When set, the
-   * crosshair is always visible and glides back here when the mouse leaves
-   * (and stays here on touch). When omitted, it only shows while hovering,
-   * like the home page CursorTracker.
-   */
-  rest?: [number, number];
   /** Faint 20px drafting grid behind the lines */
   grid?: boolean;
   className?: string;
@@ -22,16 +15,17 @@ export type CrosshairProps = {
 
 // Same follow feel as CursorTracker
 const FOLLOW = { duration: 0.12, ease: "power1.out" };
-const GLIDE = { duration: 0.7, ease: "expo.out" };
+const SNAP = { duration: 0 };
 
 /**
  * Mouse-following crosshair with live X / Y readout, based on the home page
  * CursorTracker but without the drag-selection box or the bordered centre
- * square. Fills its parent (give the parent a size). Decorative only.
+ * square. Hover only: it appears while the mouse is over it and hides on
+ * leave (nothing shows on touch). Fills its parent (give the parent a size).
+ * Decorative only.
  */
 export function Crosshair({
   theme = "light",
-  rest,
   grid = true,
   className = "",
 }: CrosshairProps) {
@@ -41,11 +35,8 @@ export function Crosshair({
   const pinRef = useRef<HTMLDivElement>(null);
   const xTextRef = useRef<HTMLSpanElement>(null);
   const yTextRef = useRef<HTMLSpanElement>(null);
-  const restRef = useRef(rest);
-  restRef.current = rest;
 
   const isDark = theme === "dark";
-  const alwaysOn = rest !== undefined;
 
   const place = (x: number, y: number, motion: gsap.TweenVars) => {
     const reduced = window.matchMedia(REDUCED_MOTION).matches;
@@ -57,42 +48,14 @@ export function Crosshair({
     if (yTextRef.current) yTextRef.current.textContent = `Y: ${Math.round(y)}`;
   };
 
-  const goToRest = (motion: gsap.TweenVars) => {
-    const box = boxRef.current;
-    const point = restRef.current;
-    if (!(box && point)) return;
-    box.dataset.idle = "true";
-    place(box.clientWidth * point[0], box.clientHeight * point[1], motion);
-  };
-
-  // Snap to the rest point on mount and whenever the box resizes while idle
-  // biome-ignore lint/correctness/useExhaustiveDependencies: helpers read refs only
-  useEffect(() => {
-    const box = boxRef.current;
-    if (!(box && restRef.current)) return;
-    goToRest({ duration: 0 });
-    const observer = new ResizeObserver(() => {
-      if (box.dataset.idle === "true") goToRest({ duration: 0 });
-    });
-    observer.observe(box);
-    return () => observer.disconnect();
-  }, [alwaysOn]);
-
-  const move = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== "mouse") return;
-    const box = event.currentTarget;
-    const rect = box.getBoundingClientRect();
-    const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
-    const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
-    box.dataset.idle = "false";
-    place(x, y, FOLLOW);
-  };
-
-  const leave = () => goToRest(GLIDE);
-
-  const show = alwaysOn
-    ? "opacity-100"
-    : "opacity-0 group-hover/crosshair:opacity-100";
+  const track =
+    (motion: gsap.TweenVars) => (event: PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType !== "mouse") return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width);
+      const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height);
+      place(x, y, motion);
+    };
   const line = isDark ? "bg-white/30" : "bg-black/10";
   const label = isDark ? "text-white/80" : "text-black/40";
 
@@ -100,10 +63,10 @@ export function Crosshair({
     <div
       aria-hidden="true"
       className={`group/crosshair relative h-full w-full select-none overflow-hidden ${className}`}
-      data-idle={alwaysOn ? "true" : "false"}
       onDragStart={(e) => e.preventDefault()}
-      onPointerLeave={leave}
-      onPointerMove={move}
+      // Enter: jump to the pointer so the lines never sweep in from a corner
+      onPointerEnter={track(SNAP)}
+      onPointerMove={track(FOLLOW)}
       ref={boxRef}
     >
       {grid ? (
@@ -122,7 +85,7 @@ export function Crosshair({
         />
       ) : null}
 
-      <div className={`transition-opacity duration-300 ${show}`}>
+      <div className="opacity-0 transition-opacity duration-300 group-hover/crosshair:opacity-100">
         {/* Vertical line (follows X) */}
         <div
           className={`pointer-events-none absolute inset-y-0 left-0 w-px ${line}`}

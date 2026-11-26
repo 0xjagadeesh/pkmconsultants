@@ -18,9 +18,6 @@ type ImageRevealCrosshairProps = {
   className?: string;
 };
 
-/** Where the right-panel crosshair rests when no mouse is over it (fraction) */
-const REST_X = 0.4;
-const REST_Y = 0.62;
 /** Starting zoom of the photo; it settles to 1 as the reveal completes */
 const ZOOM_FROM = 1.12;
 
@@ -34,7 +31,7 @@ const LABEL =
  * Drafting-sheet section: a large photo on the left that unrolls from its
  * top-left corner on scroll, with tracking lines and an X / Y readout riding
  * its moving corner, and a panel on the right with the shared <Crosshair />
- * (follows the mouse, rests at a fixed point on touch / when the pointer leaves).
+ * (shows and follows the mouse on hover).
  */
 export function ImageRevealCrosshair({
   src,
@@ -175,10 +172,10 @@ export function ImageRevealCrosshair({
           </div>
         </div>
 
-        {/* ── Right: crosshair panel (shared Crosshair, rests when idle) ── */}
+        {/* ── Right: crosshair panel (shared Crosshair, hover only) ── */}
         <div className="relative min-h-72 border-[#121212]/15 border-t lg:min-h-0 lg:border-t-0">
           <div className="absolute inset-0">
-            <Crosshair rest={[REST_X, REST_Y]} />
+            <Crosshair />
           </div>
         </div>
       </div>
