@@ -7,6 +7,7 @@ import { NumberedList } from "@/components/blocks/numbered-list";
 import { PageCta } from "@/components/blocks/page-cta";
 import { PageHero } from "@/components/blocks/page-hero";
 import { PostItGrid } from "@/components/blocks/post-it-grid";
+import { ServiceNavList } from "@/components/blocks/service-nav-list";
 import { JsonLdScript } from "@/components/json-ld";
 import { ScrollRevealSplit } from "@/components/scroll-reveal-split";
 import { SCOPE_OF_SERVICES } from "@/data/pkm-portfolio";
@@ -74,6 +75,22 @@ export default async function ServiceDetailPage({ params }: Props) {
   const { scope, detail } = service;
   const { reveal } = detail;
   const faqs = detail.faqs.slice(0, MAX_FAQS);
+
+  // Other disciplines, starting with the next one and wrapping around
+  const position = SCOPE_OF_SERVICES.findIndex((s) => s.slug === scope.slug);
+  const nextServices = SCOPE_OF_SERVICES.flatMap((_, offset) => {
+    const index = (position + 1 + offset) % SCOPE_OF_SERVICES.length;
+    const s = SCOPE_OF_SERVICES[index];
+    if (!s || s.slug === scope.slug) return [];
+    return [
+      {
+        number: String(index + 1).padStart(2, "0"),
+        title: s.discipline,
+        href: `/services/${s.slug}`,
+        icon: s.slug,
+      },
+    ];
+  });
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}/services/${slug}`;
 
@@ -189,6 +206,11 @@ export default async function ServiceDetailPage({ params }: Props) {
       />
 
       <FaqBlock items={faqs} title={`Questions about ${detail.code} design`} />
+
+      <ServiceNavList
+        items={nextServices}
+        title={["Explore our other", "MEPF services"]}
+      />
 
       <PageCta />
     </>
