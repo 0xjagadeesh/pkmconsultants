@@ -61,7 +61,7 @@ const EASE = "ease-[cubic-bezier(0.16,1,0.3,1)]";
 /**
  * Light index of links (e.g. "next service"). A brand-blue highlight slides to
  * the hovered / focused row, its label rolls and turns white, its icon square
- * inverts with a rolling glyph, and the other rows dim.
+ * inverts with a rolling glyph. Other rows stay as they are.
  * Touch devices get plain rows (no hover), still fully tappable.
  */
 export function ServiceNavList({
@@ -110,7 +110,7 @@ export function ServiceNavList({
           {/* Sliding highlight (pointer devices only) */}
           <li
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-x-0 top-0 hidden bg-[#261CC1] transition-[transform,height,opacity] duration-500 motion-reduce:transition-none pointer-fine:block ${EASE} ${
+            className={`pointer-events-none absolute inset-x-0 top-0 hidden bg-[#261CC1] transition-[transform,height,opacity] duration-[900ms] motion-reduce:transition-none pointer-fine:block ${EASE} ${
               active === null ? "opacity-0" : "opacity-100"
             }`}
             style={{
@@ -121,7 +121,6 @@ export function ServiceNavList({
 
           {items.map((item, index) => {
             const isActive = active === index;
-            const isDimmed = active !== null && !isActive;
             return (
               <li
                 className="relative"
@@ -131,9 +130,7 @@ export function ServiceNavList({
                 }}
               >
                 <Link
-                  className={`group grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-[#121212]/15 border-b px-6 py-4 no-underline outline-none transition-opacity duration-300 focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5 ${EASE} ${
-                    isDimmed ? "opacity-40" : "opacity-100"
-                  }`}
+                  className={`group grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-[#121212]/15 border-b px-6 py-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5`}
                   data-active={isActive}
                   href={item.href}
                   onBlur={() => setActive(null)}
@@ -142,7 +139,7 @@ export function ServiceNavList({
                 >
                   {/* Number */}
                   <span
-                    className={`font-bold font-metropolis text-[#121212] text-[1.1rem] tracking-tight transition-colors duration-300 group-data-[active=true]:text-[#f7fbff] lg:text-[clamp(1.4rem,2.4vw,2.4rem)] ${EASE}`}
+                    className={`font-bold font-metropolis text-[#121212] text-[1.1rem] tracking-tight transition-colors duration-700 group-data-[active=true]:text-[#f7fbff] lg:text-[clamp(1.4rem,2.4vw,2.4rem)] ${EASE}`}
                   >
                     {item.number}
                     <span className="ml-2 lg:ml-3">/</span>
@@ -151,13 +148,13 @@ export function ServiceNavList({
                   {/* Title with roll-up on activate */}
                   <span className="relative block overflow-hidden font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
                     <span
-                      className={`block text-[#121212] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:-translate-y-full ${EASE}`}
+                      className={`block text-[#121212] transition-transform duration-[900ms] motion-reduce:transition-none group-data-[active=true]:-translate-y-full ${EASE}`}
                     >
                       {item.title}
                     </span>
                     <span
                       aria-hidden="true"
-                      className={`absolute inset-x-0 top-0 block translate-y-full text-[#f7fbff] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:translate-y-0 ${EASE}`}
+                      className={`absolute inset-x-0 top-0 block translate-y-full text-[#f7fbff] transition-transform duration-[900ms] motion-reduce:transition-none group-data-[active=true]:translate-y-0 ${EASE}`}
                     >
                       {item.title}
                     </span>
@@ -166,15 +163,15 @@ export function ServiceNavList({
                   {/* Icon square: tint → white, glyph rolls diagonally */}
                   <span
                     aria-hidden="true"
-                    className={`relative flex size-11 items-center justify-center overflow-hidden bg-[#121212]/[0.06] text-[#121212]/60 transition-colors duration-300 group-data-[active=true]:bg-[#f7fbff] group-data-[active=true]:text-[#261CC1] lg:size-16 ${EASE}`}
+                    className={`relative flex size-11 items-center justify-center overflow-hidden bg-[#121212]/[0.06] text-[#121212]/60 transition-colors duration-700 group-data-[active=true]:bg-[#f7fbff] group-data-[active=true]:text-[#261CC1] lg:size-16 ${EASE}`}
                   >
                     <span
-                      className={`absolute transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:translate-x-[150%] group-data-[active=true]:-translate-y-[150%] ${EASE}`}
+                      className={`absolute transition-transform duration-[900ms] motion-reduce:transition-none group-data-[active=true]:translate-x-[150%] group-data-[active=true]:-translate-y-[150%] ${EASE}`}
                     >
                       <Glyph icon={item.icon} />
                     </span>
                     <span
-                      className={`absolute -translate-x-[150%] translate-y-[150%] transition-transform duration-500 motion-reduce:transition-none group-data-[active=true]:translate-x-0 group-data-[active=true]:translate-y-0 ${EASE}`}
+                      className={`absolute -translate-x-[150%] translate-y-[150%] transition-transform duration-[900ms] motion-reduce:transition-none group-data-[active=true]:translate-x-0 group-data-[active=true]:translate-y-0 ${EASE}`}
                     >
                       <Glyph icon={item.icon} />
                     </span>
