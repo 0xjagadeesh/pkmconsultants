@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import { CoordinateField } from "@/components/blocks/coordinate-field";
+import { Crosshair } from "@/components/crosshair";
 
 export type ProjectRow = {
   id: string;
@@ -143,7 +143,7 @@ export function ProjectStack({
 
   return (
     <section className="bg-[#f7fbff] text-[#121212]">
-      {/* ── Header: title + coordinate field ── */}
+      {/* ── Header: title + hover crosshair ── */}
       <div className="grid grid-cols-1 border-[#121212]/15 border-b lg:grid-cols-2">
         <div className="flex min-h-[300px] flex-col justify-between gap-12 px-6 pt-28 pb-8 sm:px-10 lg:min-h-[480px] lg:border-[#121212]/15 lg:border-r lg:px-4 lg:pt-36 lg:pb-9 xl:px-5">
           <h1 className="fade-in slide-in-from-bottom-4 m-0 animate-in fill-mode-both font-extrabold font-metropolis text-[clamp(3.2rem,7vw,6rem)] leading-[0.95] tracking-[-0.045em] duration-700">
@@ -154,7 +154,7 @@ export function ProjectStack({
           </p>
         </div>
         <div className="hidden lg:block">
-          <CoordinateField />
+          <Crosshair />
         </div>
       </div>
 
