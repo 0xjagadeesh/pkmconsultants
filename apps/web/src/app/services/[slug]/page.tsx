@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { BreadcrumbList, FAQPage, Service, WithContext } from "schema-dts";
 
-import { FaqBlock } from "@/components/blocks/faq-block";
+import { FaqBlock2 } from "@/components/blocks/faq-block-2";
 import { NumberedList } from "@/components/blocks/numbered-list";
 import { PageCta } from "@/components/blocks/page-cta";
 import { PageHero } from "@/components/blocks/page-hero";
@@ -205,7 +205,11 @@ export default async function ServiceDetailPage({ params }: Props) {
         title="What is included"
       />
 
-      <FaqBlock items={faqs} title={`Questions about ${detail.code} design`} />
+      <FaqBlock2
+        image={detail.heroImage}
+        items={faqs}
+        title={`Questions about ${detail.code} design`}
+      />
 
       <ServiceNavList
         items={nextServices}
