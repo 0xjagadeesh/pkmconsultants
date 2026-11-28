@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useRef } from "react";
 
 import { SectionLabel } from "@/components/blocks/section-label";
 import { MaskRevealText } from "@/components/mask-reveal-text";
@@ -56,122 +53,44 @@ type ServiceNavListProps = {
   id?: string;
 };
 
-// One curve for the whole wipe (background, text and icon move as one layer)
-const WIPE = "clip-path 900ms cubic-bezier(0.16,1,0.3,1)";
-const HIDDEN_TOP = "inset(0% 0% 100% 0%)"; // collapsed at the top (enter start)
-const SHOWN = "inset(0% 0% 0% 0%)";
-const HIDDEN_BOTTOM = "inset(100% 0% 0% 0%)"; // collapsed at the bottom (exit end)
+// One motion for every moving part, so wipe, text and icon land together
+const MOTION =
+  "transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none";
 
-// Row layout shared by the base layer and the blue overlay, so they align exactly
-const ROW_GRID =
-  "grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-6 py-4 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5";
+// "On" state for a row: mouse hover or keyboard focus
+// (outgoing copy drops down out of view, incoming copy drops in from above)
+const OUT = "group-hover:translate-y-full group-focus-visible:translate-y-full";
+const IN =
+  "-translate-y-full group-hover:translate-y-0 group-focus-visible:translate-y-0";
 
-/** Number, title and icon square in one colour scheme. */
-function RowContent({
-  item,
-  active,
+/** A value that rolls top → bottom: dark copy out, light copy in. */
+function Roll({
+  children,
+  from,
+  to,
 }: {
-  item: ServiceNavItem;
-  active: boolean;
+  children: React.ReactNode;
+  from: string;
+  to: string;
 }) {
   return (
-    <>
-      <span
-        className={`font-bold font-metropolis text-[1.1rem] tracking-tight lg:text-[clamp(1.4rem,2.4vw,2.4rem)] ${
-          active ? "text-[#f7fbff]" : "text-[#121212]"
-        }`}
-      >
-        {item.number}
-        <span className="ml-2 lg:ml-3">/</span>
-      </span>
-      <span
-        className={`font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)] ${
-          active ? "text-[#f7fbff]" : "text-[#121212]"
-        }`}
-      >
-        {item.title}
-      </span>
+    <span className="relative block overflow-hidden">
+      <span className={`block ${from} ${MOTION} ${OUT}`}>{children}</span>
       <span
         aria-hidden="true"
-        className={`flex size-11 items-center justify-center lg:size-16 ${
-          active
-            ? "bg-[#f7fbff] text-[#261CC1]"
-            : "bg-[#121212]/[0.06] text-[#121212]/60"
-        }`}
+        className={`absolute inset-0 block ${to} ${MOTION} ${IN}`}
       >
-        <Glyph icon={item.icon} />
+        {children}
       </span>
-    </>
+    </span>
   );
 }
 
 /**
- * One row. The hover state is a full blue copy of the row (white text, white
- * icon square) laid over the base row and revealed by a single clip-path, so
- * the background and every piece of text change at exactly the same edge.
- * Enter: the clip opens from the top down. Leave: it closes towards the
- * bottom, continuing the same direction.
- */
-function NavRow({ item }: { item: ServiceNavItem }) {
-  const overlayRef = useRef<HTMLSpanElement>(null);
-
-  const enter = () => {
-    const el = overlayRef.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.style.transition = "none";
-      el.style.clipPath = SHOWN;
-      return;
-    }
-    // Restart from the top edge, then open downwards
-    el.style.transition = "none";
-    el.style.clipPath = HIDDEN_TOP;
-    el.getBoundingClientRect(); // commit the start state
-    el.style.transition = WIPE;
-    el.style.clipPath = SHOWN;
-  };
-
-  const leave = () => {
-    const el = overlayRef.current;
-    if (!el) return;
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    el.style.transition = reduced ? "none" : WIPE;
-    el.style.clipPath = HIDDEN_BOTTOM;
-  };
-
-  return (
-    <li>
-      <Link
-        className={`relative border-[#121212]/15 border-b no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset ${ROW_GRID}`}
-        href={item.href}
-        onBlur={leave}
-        onFocus={enter}
-        onMouseEnter={enter}
-        onMouseLeave={leave}
-      >
-        <RowContent active={false} item={item} />
-
-        {/* Blue copy of the row, revealed by one clip */}
-        <span
-          aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 bg-[#261CC1] ${ROW_GRID}`}
-          ref={overlayRef}
-          style={{ clipPath: HIDDEN_TOP }}
-        >
-          <RowContent active item={item} />
-        </span>
-      </Link>
-    </li>
-  );
-}
-
-/**
- * Light index of links (e.g. "next service"). Hovering or focusing a row
- * wipes a blue copy of it in from the top (and out through the bottom), so
- * the background, text and icon always change together. Each row animates
- * on its own; other rows never change.
+ * Light index of links (e.g. "next service"). Every row has its own blue
+ * layer that wipes in top → bottom on hover / focus (and leaves downward);
+ * the number, title and icon roll down with the same timing. Pure CSS, so
+ * each row animates independently and other rows never change.
  */
 export function ServiceNavList({
   label = "Next service",
@@ -200,7 +119,53 @@ export function ServiceNavList({
       <nav aria-label={lines.join(" ")}>
         <ul className="m-0 list-none border-[#121212]/15 border-t p-0">
           {items.map((item) => (
-            <NavRow item={item} key={item.href} />
+            <li key={item.href}>
+              <Link
+                className="group relative grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 overflow-hidden border-[#121212]/15 border-b px-6 py-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5"
+                href={item.href}
+              >
+                {/* Row wipe: grows from the top on enter, exits at the bottom */}
+                <span
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute inset-0 origin-bottom scale-y-0 bg-[#261CC1] group-hover:origin-top group-hover:scale-y-100 group-focus-visible:origin-top group-focus-visible:scale-y-100 ${MOTION}`}
+                />
+
+                {/* Number */}
+                <span className="relative font-bold font-metropolis text-[1.1rem] tracking-tight lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
+                  <Roll from="text-[#121212]" to="text-[#f7fbff]">
+                    {item.number}
+                    <span className="ml-2 lg:ml-3">/</span>
+                  </Roll>
+                </span>
+
+                {/* Title */}
+                <span className="relative font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
+                  <Roll from="text-[#121212]" to="text-[#f7fbff]">
+                    {item.title}
+                  </Roll>
+                </span>
+
+                {/* Icon square: its own white wipe + glyph rolling down */}
+                <span
+                  aria-hidden="true"
+                  className="relative flex size-11 items-center justify-center overflow-hidden bg-[#121212]/[0.06] lg:size-16"
+                >
+                  <span
+                    className={`absolute inset-0 origin-bottom scale-y-0 bg-[#f7fbff] group-hover:origin-top group-hover:scale-y-100 group-focus-visible:origin-top group-focus-visible:scale-y-100 ${MOTION}`}
+                  />
+                  <span
+                    className={`absolute text-[#121212]/60 ${MOTION} group-hover:translate-y-[150%] group-focus-visible:translate-y-[150%]`}
+                  >
+                    <Glyph icon={item.icon} />
+                  </span>
+                  <span
+                    className={`absolute -translate-y-[150%] text-[#261CC1] group-hover:translate-y-0 group-focus-visible:translate-y-0 ${MOTION}`}
+                  >
+                    <Glyph icon={item.icon} />
+                  </span>
+                </span>
+              </Link>
+            </li>
           ))}
         </ul>
       </nav>
