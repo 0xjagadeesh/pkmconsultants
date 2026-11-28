@@ -8,7 +8,7 @@ import { BuildingParallax2 } from "@/components/building-parallax-2";
 import { CursorTracker } from "@/components/cursor-tracker";
 import { HomeBlogSection } from "@/components/home-blog-section";
 import { MatrixSection } from "@/components/matrix-section";
-import { MepfExplode } from "@/components/mepf-explode";
+import { MepfExplode2 } from "@/components/mepf-explode-2";
 import { Prefooter } from "@/components/prefooter";
 import { SolutionsStack } from "@/components/solutions-stack";
 import { SplitWordReveal } from "@/components/split-word-reveal";
@@ -125,7 +125,7 @@ export default async function HomePage() {
       {/* ══════════════════════════════════════════
           MEPF EXPLODED VIEW — scroll-triggered 3D
       ══════════════════════════════════════════ */}
-      <MepfExplode />
+      <MepfExplode2 />
 
       {/* ══════════════════════════════════════════
           SOLUTIONS STACK — Industrialized technology stacking cards
