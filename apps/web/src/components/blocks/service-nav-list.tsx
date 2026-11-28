@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { type TransitionEvent, useState } from "react";
 
 import { SectionLabel } from "@/components/blocks/section-label";
 import { MaskRevealText } from "@/components/mask-reveal-text";
@@ -55,16 +56,27 @@ type ServiceNavListProps = {
   id?: string;
 };
 
-/** Same timing for enter and leave; matches the site's fast architectural ease */
-const WIPE = "clip-path 900ms cubic-bezier(0.16,1,0.3,1)";
-const HIDDEN_TOP = "inset(0 0 100% 0)"; // collapsed at the top edge
-const SHOWN = "inset(0 0 0 0)";
-const HIDDEN_BOTTOM = "inset(100% 0 0 0)"; // collapsed at the bottom edge
+type Phase = "idle" | "in" | "out";
 
+// One clip, one easing: background, text and icon change under the same edge
+const WIPE =
+  "transition-[clip-path] duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none";
+
+const CLIP: Record<Phase, string> = {
+  idle: "inset(0 0 100% 0)", // collapsed at the top, ready to wipe down
+  in: "inset(0 0 0 0)", // fully covering the row
+  out: "inset(100% 0 0 0)", // collapsed at the bottom: exits downward
+};
+
+/** Row layout shared by the resting row and its hover layer, so they align exactly. */
 const ROW =
   "grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-6 py-4 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5";
+const NUMBER =
+  "font-bold font-metropolis text-[1.1rem] tracking-tight lg:text-[clamp(1.4rem,2.4vw,2.4rem)]";
+const TITLE =
+  "font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]";
+const SQUARE = "flex size-11 items-center justify-center lg:size-16";
 
-/** Number, title and icon square for one row, in light or active colours. */
 function RowContent({
   item,
   active,
@@ -74,16 +86,20 @@ function RowContent({
 }) {
   return (
     <>
-      <span className="font-bold font-metropolis text-[1.1rem] tracking-tight lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
+      <span
+        className={`${NUMBER} ${active ? "text-[#f7fbff]" : "text-[#121212]"}`}
+      >
         {item.number}
         <span className="ml-2 lg:ml-3">/</span>
       </span>
-      <span className="font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
+      <span
+        className={`${TITLE} ${active ? "text-[#f7fbff]" : "text-[#121212]"}`}
+      >
         {item.title}
       </span>
       <span
         aria-hidden="true"
-        className={`flex size-11 items-center justify-center lg:size-16 ${
+        className={`${SQUARE} ${
           active
             ? "bg-[#f7fbff] text-[#261CC1]"
             : "bg-[#121212]/[0.06] text-[#121212]/60"
@@ -95,34 +111,56 @@ function RowContent({
   );
 }
 
-const reduced = () =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/**
+ * One row: the resting content, plus an identical blue "active" layer on top
+ * that is revealed by a single clip-path wiping top → bottom on hover / focus
+ * and continuing downward on leave. Background, number, title and icon all
+ * change under the same edge, so they stay perfectly in sync.
+ */
+function NavRow({ item }: { item: ServiceNavItem }) {
+  const [phase, setPhase] = useState<Phase>("idle");
 
-/** Start a wipe: snap to the hidden top edge, then open downwards. */
-function wipeIn(row: HTMLElement) {
-  const layer = row.querySelector<HTMLElement>("[data-wipe]");
-  if (!layer) return;
-  layer.style.transition = "none";
-  layer.style.clipPath = HIDDEN_TOP;
-  layer.getBoundingClientRect(); // commit the start state
-  layer.style.transition = reduced() ? "none" : WIPE;
-  layer.style.clipPath = SHOWN;
-}
+  const enter = () => setPhase("in");
+  const leave = () => setPhase((p) => (p === "idle" ? p : "out"));
+  // After the downward exit, jump back to the top without animating
+  const onTransitionEnd = (event: TransitionEvent<HTMLSpanElement>) => {
+    if (event.propertyName === "clip-path" && phase === "out") {
+      setPhase("idle");
+    }
+  };
 
-/** End a wipe: keep moving down and leave through the bottom edge. */
-function wipeOut(row: HTMLElement) {
-  const layer = row.querySelector<HTMLElement>("[data-wipe]");
-  if (!layer) return;
-  layer.style.transition = reduced() ? "none" : WIPE;
-  layer.style.clipPath = HIDDEN_BOTTOM;
+  return (
+    <li>
+      <Link
+        className={`relative block border-[#121212]/15 border-b no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset`}
+        href={item.href}
+        onBlur={leave}
+        onFocus={enter}
+        onMouseEnter={enter}
+        onMouseLeave={leave}
+      >
+        <span className={ROW}>
+          <RowContent active={false} item={item} />
+        </span>
+        <span
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 bg-[#261CC1] ${ROW} ${
+            phase === "idle" ? "" : WIPE
+          }`}
+          onTransitionEnd={onTransitionEnd}
+          style={{ clipPath: CLIP[phase] }}
+        >
+          <RowContent active item={item} />
+        </span>
+      </Link>
+    </li>
+  );
 }
 
 /**
- * Light index of links (e.g. "next service"). Each row has a blue copy of
- * itself (white text, white icon square) revealed by one clip that opens top
- * → bottom on hover / focus and leaves through the bottom edge. Background,
- * text and icon are the same layer, so they are always perfectly in sync.
- * Rows animate independently; other rows never change.
+ * Light index of links (e.g. "next service"). Hovering a row wipes a blue
+ * layer down over it (white text, inverted icon) and wipes it away downward
+ * on leave; other rows never change.
  */
 export function ServiceNavList({
   label = "Next service",
@@ -151,29 +189,7 @@ export function ServiceNavList({
       <nav aria-label={lines.join(" ")}>
         <ul className="m-0 list-none border-[#121212]/15 border-t p-0">
           {items.map((item) => (
-            <li key={item.href}>
-              <Link
-                className="relative block border-[#121212]/15 border-b no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset"
-                href={item.href}
-                onBlur={(e) => wipeOut(e.currentTarget)}
-                onFocus={(e) => wipeIn(e.currentTarget)}
-                onMouseEnter={(e) => wipeIn(e.currentTarget)}
-                onMouseLeave={(e) => wipeOut(e.currentTarget)}
-              >
-                <span className={`${ROW} text-[#121212]`}>
-                  <RowContent active={false} item={item} />
-                </span>
-                {/* Blue copy, revealed by the wipe */}
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute inset-0 bg-[#261CC1] text-[#f7fbff] ${ROW}`}
-                  data-wipe=""
-                  style={{ clipPath: HIDDEN_TOP }}
-                >
-                  <RowContent active item={item} />
-                </span>
-              </Link>
-            </li>
+            <NavRow item={item} key={item.href} />
           ))}
         </ul>
       </nav>
