@@ -7,12 +7,10 @@ import type {
 
 import { IntroBlock } from "@/components/blocks/intro-block";
 import { LinkList } from "@/components/blocks/link-list";
-import { NumberedList } from "@/components/blocks/numbered-list";
 import { PageCta } from "@/components/blocks/page-cta";
 import { PageHero } from "@/components/blocks/page-hero";
 import { StatsStrip } from "@/components/blocks/stats-strip";
 import { JsonLdScript } from "@/components/json-ld";
-import { DESIGN_PROCESS } from "@/data/pkm-content";
 import { ALL_PROJECTS, SCOPE_OF_SERVICES } from "@/data/pkm-portfolio";
 import { getBaseUrl } from "@/utils";
 
@@ -149,14 +147,21 @@ export default function AboutPage() {
         title="MEPF engineering services we provide"
       />
 
-      {/* 5. How we work — the single home of the design process */}
-      <NumberedList
-        id="process"
-        intro="One fixed workflow, so drawings arrive on a schedule you can plan around."
-        items={DESIGN_PROCESS}
-        label="Process"
-        title="Our MEPF design process"
-      />
+      {/* 5. How we work — full method lives on /how-we-work */}
+      <div id="process">
+        <IntroBlock
+          body={[
+            "Six stages take every project from brief to building: site study, load calculations, coordinated design, code review, approval drawings and site support.",
+          ]}
+          image={{
+            src: "/images/metal-structure.jpg",
+            alt: "Steel structure on site awaiting coordinated building services",
+          }}
+          label="How we work"
+          link={{ href: "/how-we-work", label: "See how we work" }}
+          statement="One method, from load calculations to site support."
+        />
+      </div>
 
       {/* TODO: Leadership / team section (founder, years of experience,
           credentials) once real names and bios are available. */}
