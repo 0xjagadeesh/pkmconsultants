@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { SectionLabel } from "@/components/blocks/section-label";
@@ -53,44 +55,74 @@ type ServiceNavListProps = {
   id?: string;
 };
 
-// One motion for every moving part, so wipe, text and icon land together
-const MOTION =
-  "transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none";
+/** Same timing for enter and leave; matches the site's fast architectural ease */
+const WIPE = "clip-path 900ms cubic-bezier(0.16,1,0.3,1)";
+const HIDDEN_TOP = "inset(0 0 100% 0)"; // collapsed at the top edge
+const SHOWN = "inset(0 0 0 0)";
+const HIDDEN_BOTTOM = "inset(100% 0 0 0)"; // collapsed at the bottom edge
 
-// "On" state for a row: mouse hover or keyboard focus
-// (outgoing copy drops down out of view, incoming copy drops in from above)
-const OUT = "group-hover:translate-y-full group-focus-visible:translate-y-full";
-const IN =
-  "-translate-y-full group-hover:translate-y-0 group-focus-visible:translate-y-0";
+const ROW =
+  "grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 px-6 py-4 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5";
 
-/** A value that rolls top → bottom: dark copy out, light copy in. */
-function Roll({
-  children,
-  from,
-  to,
+/** Number, title and icon square for one row, in light or active colours. */
+function RowContent({
+  item,
+  active,
 }: {
-  children: React.ReactNode;
-  from: string;
-  to: string;
+  item: ServiceNavItem;
+  active: boolean;
 }) {
   return (
-    <span className="relative block overflow-hidden">
-      <span className={`block ${from} ${MOTION} ${OUT}`}>{children}</span>
+    <>
+      <span className="font-bold font-metropolis text-[1.1rem] tracking-tight lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
+        {item.number}
+        <span className="ml-2 lg:ml-3">/</span>
+      </span>
+      <span className="font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
+        {item.title}
+      </span>
       <span
         aria-hidden="true"
-        className={`absolute inset-0 block ${to} ${MOTION} ${IN}`}
+        className={`flex size-11 items-center justify-center lg:size-16 ${
+          active
+            ? "bg-[#f7fbff] text-[#261CC1]"
+            : "bg-[#121212]/[0.06] text-[#121212]/60"
+        }`}
       >
-        {children}
+        <Glyph icon={item.icon} />
       </span>
-    </span>
+    </>
   );
 }
 
+const reduced = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Start a wipe: snap to the hidden top edge, then open downwards. */
+function wipeIn(row: HTMLElement) {
+  const layer = row.querySelector<HTMLElement>("[data-wipe]");
+  if (!layer) return;
+  layer.style.transition = "none";
+  layer.style.clipPath = HIDDEN_TOP;
+  layer.getBoundingClientRect(); // commit the start state
+  layer.style.transition = reduced() ? "none" : WIPE;
+  layer.style.clipPath = SHOWN;
+}
+
+/** End a wipe: keep moving down and leave through the bottom edge. */
+function wipeOut(row: HTMLElement) {
+  const layer = row.querySelector<HTMLElement>("[data-wipe]");
+  if (!layer) return;
+  layer.style.transition = reduced() ? "none" : WIPE;
+  layer.style.clipPath = HIDDEN_BOTTOM;
+}
+
 /**
- * Light index of links (e.g. "next service"). Every row has its own blue
- * layer that wipes in top → bottom on hover / focus (and leaves downward);
- * the number, title and icon roll down with the same timing. Pure CSS, so
- * each row animates independently and other rows never change.
+ * Light index of links (e.g. "next service"). Each row has a blue copy of
+ * itself (white text, white icon square) revealed by one clip that opens top
+ * → bottom on hover / focus and leaves through the bottom edge. Background,
+ * text and icon are the same layer, so they are always perfectly in sync.
+ * Rows animate independently; other rows never change.
  */
 export function ServiceNavList({
   label = "Next service",
@@ -121,48 +153,24 @@ export function ServiceNavList({
           {items.map((item) => (
             <li key={item.href}>
               <Link
-                className="group relative grid min-h-11 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-4 overflow-hidden border-[#121212]/15 border-b px-6 py-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:px-10 lg:py-5"
+                className="relative block border-[#121212]/15 border-b no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#261CC1] focus-visible:ring-inset"
                 href={item.href}
+                onBlur={(e) => wipeOut(e.currentTarget)}
+                onFocus={(e) => wipeIn(e.currentTarget)}
+                onMouseEnter={(e) => wipeIn(e.currentTarget)}
+                onMouseLeave={(e) => wipeOut(e.currentTarget)}
               >
-                {/* Row wipe: grows from the top on enter, exits at the bottom */}
+                <span className={`${ROW} text-[#121212]`}>
+                  <RowContent active={false} item={item} />
+                </span>
+                {/* Blue copy, revealed by the wipe */}
                 <span
                   aria-hidden="true"
-                  className={`pointer-events-none absolute inset-0 origin-bottom scale-y-0 bg-[#261CC1] group-hover:origin-top group-hover:scale-y-100 group-focus-visible:origin-top group-focus-visible:scale-y-100 ${MOTION}`}
-                />
-
-                {/* Number */}
-                <span className="relative font-bold font-metropolis text-[1.1rem] tracking-tight lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
-                  <Roll from="text-[#121212]" to="text-[#f7fbff]">
-                    {item.number}
-                    <span className="ml-2 lg:ml-3">/</span>
-                  </Roll>
-                </span>
-
-                {/* Title */}
-                <span className="relative font-extrabold font-metropolis text-[1.15rem] leading-[1.25] tracking-[-0.025em] lg:text-[clamp(1.4rem,2.4vw,2.4rem)]">
-                  <Roll from="text-[#121212]" to="text-[#f7fbff]">
-                    {item.title}
-                  </Roll>
-                </span>
-
-                {/* Icon square: its own white wipe + glyph rolling down */}
-                <span
-                  aria-hidden="true"
-                  className="relative flex size-11 items-center justify-center overflow-hidden bg-[#121212]/[0.06] lg:size-16"
+                  className={`pointer-events-none absolute inset-0 bg-[#261CC1] text-[#f7fbff] ${ROW}`}
+                  data-wipe=""
+                  style={{ clipPath: HIDDEN_TOP }}
                 >
-                  <span
-                    className={`absolute inset-0 origin-bottom scale-y-0 bg-[#f7fbff] group-hover:origin-top group-hover:scale-y-100 group-focus-visible:origin-top group-focus-visible:scale-y-100 ${MOTION}`}
-                  />
-                  <span
-                    className={`absolute text-[#121212]/60 ${MOTION} group-hover:translate-y-[150%] group-focus-visible:translate-y-[150%]`}
-                  >
-                    <Glyph icon={item.icon} />
-                  </span>
-                  <span
-                    className={`absolute -translate-y-[150%] text-[#261CC1] group-hover:translate-y-0 group-focus-visible:translate-y-0 ${MOTION}`}
-                  >
-                    <Glyph icon={item.icon} />
-                  </span>
+                  <RowContent active item={item} />
                 </span>
               </Link>
             </li>
