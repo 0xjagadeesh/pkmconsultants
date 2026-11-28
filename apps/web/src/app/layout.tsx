@@ -7,7 +7,7 @@ import { VisualEditing } from "next-sanity/visual-editing";
 
 import { Footer } from "@/components/footer";
 import { CombinedJsonLd } from "@/components/json-ld";
-import { Navbar } from "@/components/navbar";
+import { NavSwitch } from "@/components/nav-switch";
 import { NoImageDrag } from "@/components/no-image-drag";
 import { PageTransition } from "@/components/page-transition";
 import { PreviewBar } from "@/components/preview-bar";
@@ -86,7 +86,7 @@ export default async function RootLayout({
       */}
       <body className="antialiased">
         <Providers>
-          <Navbar />
+          <NavSwitch />
           {children}
           <Footer />
           <PageTransition />
