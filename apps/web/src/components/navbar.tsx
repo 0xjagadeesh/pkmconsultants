@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+
+import { MenuButton, SideMenu } from "@/components/side-menu";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,11 +17,6 @@ const NAV_LINKS = [
   { name: "Projects,", href: "/projects" },
   { name: "Blog,", href: "/blog" },
   { name: "Contact", href: "/contact" },
-];
-
-const ALL_LINKS = [
-  { name: "Home", href: "/" },
-  ...NAV_LINKS.map((l) => ({ ...l, name: l.name.replace(",", "") })),
 ];
 
 /* ── GSAP Animated Nav Link with dual-layer character stagger ── */
@@ -181,226 +178,6 @@ function PkmLogo({
 }
 
 /* ════════════════════════════════════════════════════
-   FULL-SCREEN OVERLAY MENU  (GSAP clip-path open/close)
-════════════════════════════════════════════════════ */
-function FullscreenMenu({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  const pathname = usePathname();
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const linksRef = useRef<HTMLUListElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
-
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
-
-  useEffect(() => {
-    const overlay = overlayRef.current;
-    const items = linksRef.current?.querySelectorAll("li") ?? [];
-    const footer = footerRef.current;
-    if (!overlay) return;
-
-    if (open) {
-      document.body.style.overflow = "hidden";
-      gsap.set(overlay, { display: "flex" });
-      gsap.fromTo(
-        overlay,
-        { clipPath: "inset(0 0 100% 0)" },
-        { clipPath: "inset(0 0 0% 0)", duration: 0.6, ease: "power4.inOut" }
-      );
-      gsap.fromTo(
-        items,
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.55,
-          ease: "power3.out",
-          stagger: 0.07,
-          delay: 0.3,
-        }
-      );
-      if (footer)
-        gsap.fromTo(
-          footer,
-          { y: 24, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.4, ease: "power3.out", delay: 0.55 }
-        );
-    } else {
-      document.body.style.overflow = "";
-      gsap.to(overlay, {
-        clipPath: "inset(0 0 100% 0)",
-        duration: 0.45,
-        ease: "power4.inOut",
-        onComplete: () => gsap.set(overlay, { display: "none" }),
-      });
-    }
-  }, [open]);
-
-  /* ESC key */
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  return (
-    <div
-      ref={overlayRef}
-      style={{
-        display: "none",
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        backgroundColor: "#1e1926",
-        flexDirection: "column",
-        clipPath: "inset(0 0 100% 0)",
-        padding: "clamp(1rem, 4vw, 2rem) clamp(1.25rem, 6vw, 2.5rem)",
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-      }}
-    >
-      {/* Top bar */}
-      <div
-        className="flex items-center justify-between"
-        style={{ height: "5rem" }}
-      >
-        <Link
-          href="/"
-          onClick={onClose}
-          className="font-bold uppercase tracking-[0.18em] text-white no-underline text-sm"
-        >
-          PKM<span style={{ color: "#261CC1" }}> Consultants</span>
-        </Link>
-
-        {/* Two-line hamburger → becomes X */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close menu"
-          className="relative flex size-11 flex-col items-end justify-center gap-[7px]"
-        >
-          <span className="block h-[1.5px] w-6 bg-white transition-all duration-300 rotate-45 translate-y-[4.25px]" />
-          <span className="block h-[1.5px] w-6 bg-white transition-all duration-300 -rotate-45 -translate-y-[4.25px]" />
-        </button>
-      </div>
-
-      {/* Nav links */}
-      <ul
-        ref={linksRef}
-        className="flex-1 flex flex-col justify-center gap-0 list-none p-0 m-0 shrink-0"
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          marginTop: "1.5rem",
-        }}
-      >
-        {ALL_LINKS.map((link, i) => (
-          <li
-            key={link.href}
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            <Link
-              href={link.href}
-              onClick={onClose}
-              className="group flex items-center justify-between no-underline py-5 transition-colors duration-200"
-              style={{
-                color: isActive(link.href)
-                  ? "#261CC1"
-                  : "rgba(255,255,255,0.88)",
-              }}
-            >
-              <div className="flex items-baseline gap-5">
-                <span
-                  className="text-white/20 font-light"
-                  style={{ fontSize: "0.7rem", letterSpacing: "0.12em" }}
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span
-                  className="font-black uppercase leading-none tracking-[-0.03em]"
-                  style={{ fontSize: "clamp(2rem,7vw,4rem)" }}
-                >
-                  {link.name}
-                </span>
-              </div>
-              <svg
-                aria-hidden="true"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 -rotate-45"
-                style={{ color: "#261CC1" }}
-              >
-                <path
-                  d="M5 12h14M12 5l7 7-7 7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      {/* Footer */}
-      <div
-        ref={footerRef}
-        className="flex items-center justify-between pt-5 mt-4"
-        style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-      >
-        <p
-          className="text-white/25 tracking-[0.15em] uppercase"
-          style={{ fontSize: "0.65rem" }}
-        >
-          © {new Date().getFullYear()} PKM Consultants
-        </p>
-        <Link
-          href="/contact"
-          onClick={onClose}
-          className="inline-flex items-center gap-2 text-white no-underline font-semibold transition-colors hover:text-[#261CC1]"
-          style={{ fontSize: "0.7rem", letterSpacing: "0.12em" }}
-        >
-          Get in Touch →
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════
-   TWO-LINE HAMBURGER BUTTON
-════════════════════════════════════════════════════ */
-function HamburgerButton({ onClick }: { onClick: () => void }) {
-  const lineColor = "var(--nav-fg)";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Toggle menu"
-      className="flex size-11 flex-col items-end justify-center gap-[7px]"
-    >
-      <span
-        className="block h-[1.5px] w-6 transition-colors duration-300"
-        style={{ backgroundColor: lineColor }}
-      />
-      <span
-        className="block h-[1.5px] w-4 transition-colors duration-300"
-        style={{ backgroundColor: lineColor }}
-      />
-    </button>
-  );
-}
-
-/* ════════════════════════════════════════════════════
    NAVBAR
 ════════════════════════════════════════════════════ */
 type NavTone = "light" | "dark" | "brand";
@@ -455,7 +232,16 @@ export function Navbar() {
   const svgRef = useRef<SVGSVGElement>(null);
   const isHome = pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuId = useId();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+    menuButtonRef.current?.focus({ preventScroll: true });
+  }, []);
   const [tone, setTone] = useState<NavTone>("light");
+  // The logo sits on the left and is probed on its own: split sections can be
+  // blue on the left and light on the right (or the reverse)
+  const [logoTone, setLogoTone] = useState<NavTone>("light");
 
   // Close menu on route change
   // biome-ignore lint/correctness/useExhaustiveDependencies: route change trigger
@@ -627,6 +413,23 @@ export function Navbar() {
         // Sample where the links / hamburger sit (right side, mid-bar)
         const next = toneAt(window.innerWidth * 0.75, 30);
         setTone((current) => (current === next ? current : next));
+
+        // Logo: sample under the centre of the mark (it grows on Home)
+        const logo = svgRef.current?.getBoundingClientRect();
+        const nextLogo =
+          logo && logo.width > 0
+            ? toneAt(
+                Math.min(
+                  Math.max(logo.left + logo.width / 2, 1),
+                  window.innerWidth - 1
+                ),
+                Math.min(
+                  Math.max(logo.top + logo.height / 2, 1),
+                  window.innerHeight - 1
+                )
+              )
+            : next;
+        setLogoTone((current) => (current === nextLogo ? current : nextLogo));
       });
     };
 
@@ -664,7 +467,12 @@ export function Navbar() {
           <Link
             href="/"
             className="self-start mt-1 lg:mt-[17px] shrink-0"
-            style={{ overflow: "visible" }}
+            style={
+              {
+                overflow: "visible",
+                "--nav-logo": NAV_TONE_VARS[logoTone]["--nav-logo"],
+              } as React.CSSProperties
+            }
           >
             <PkmLogo svgRef={svgRef} />
             <span className="sr-only">PKM Consultants</span>
@@ -683,15 +491,22 @@ export function Navbar() {
               />
             ))}
           </nav>
-          {/* RIGHT — Hamburger */}
-          <div className="flex w-11 shrink-0 items-center justify-end lg:pointer-fine:hidden">
-            <HamburgerButton onClick={() => setMenuOpen(true)} />
+          {/* RIGHT — Menu button (touch / below lg), Enerblock style */}
+          <div className="flex w-[min(50vw,200px)] shrink-0 items-center justify-end lg:pointer-fine:hidden">
+            <MenuButton
+              buttonRef={menuButtonRef}
+              className="w-full"
+              controls={menuId}
+              onOpen={() => setMenuOpen(true)}
+              open={menuOpen}
+              tone={tone === "light" ? "light" : "dark"}
+            />
           </div>
         </div>
       </nav>
 
-      {/* ── FULL-SCREEN MENU ── */}
-      <FullscreenMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      {/* ── SIDE MENU ── */}
+      <SideMenu id={menuId} onClose={closeMenu} open={menuOpen} />
     </>
   );
 }
