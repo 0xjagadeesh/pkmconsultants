@@ -13,6 +13,7 @@ const baseUrl = getBaseUrl();
 /** Code-defined routes that are not Sanity pages. */
 const STATIC_PATHS = [
   "/about",
+  "/how-we-work",
   "/services",
   ...SCOPE_OF_SERVICES.map((service) => `/services/${service.slug}`),
   "/projects",

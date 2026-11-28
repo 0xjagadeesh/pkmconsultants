@@ -201,7 +201,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           },
         ]}
         label="Scope"
-        link={{ href: "/about#process", label: "See how we work" }}
+        link={{ href: "/how-we-work", label: "See how we work" }}
         title="What is included"
       />
 

@@ -58,7 +58,7 @@ export default function ServicesPage() {
           alt: "Architectural floor plan used for MEPF coordination",
         }}
         label="Approach"
-        link={{ href: "/about#process", label: "See how we work" }}
+        link={{ href: "/how-we-work", label: "See how we work" }}
         statement="Five disciplines, one coordinated set of drawings."
       />
 

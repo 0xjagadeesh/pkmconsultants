@@ -57,6 +57,7 @@ const FOOTER_BLOCKS: FooterBlock[] = [
     columns: [
       [
         { label: "About Us", href: "/about" },
+        { label: "How We Work", href: "/how-we-work" },
         { label: "Projects", href: "/projects" },
         { label: "Our Story", href: "/about" },
         { label: "Careers", href: "/contact" },
