@@ -44,7 +44,6 @@ export function MethodHero({
             className="m-0 mt-8 font-extrabold font-metropolis text-[clamp(2.6rem,5vw,5rem)] leading-[0.98] tracking-[-0.045em]"
             delay={0.2}
             lines={title}
-            maskColor="#0d0c11"
             scrollTrigger={false}
           />
         </div>
