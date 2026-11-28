@@ -17,6 +17,8 @@ const STATIC_PATHS = [
   ...SCOPE_OF_SERVICES.map((service) => `/services/${service.slug}`),
   "/projects",
   "/contact",
+  "/privacy",
+  "/terms",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -32,7 +34,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}${path}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
-      priority: path.startsWith("/services") ? 0.9 : 0.7,
+      priority: path.startsWith("/services")
+        ? 0.9
+        : ["/privacy", "/terms"].includes(path)
+          ? 0.3
+          : 0.7,
     })),
     ...slugPages.map((page: Page) => ({
       url: `${baseUrl}${page.slug}`,
