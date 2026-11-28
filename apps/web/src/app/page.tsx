@@ -4,7 +4,7 @@ import { queryBlogIndexPageBlogs } from "@workspace/sanity/query";
 import type { Metadata } from "next";
 
 import { AnimatedCTAButton } from "@/components/animated-cta-button";
-import { BuildingParallax } from "@/components/building-parallax";
+import { BuildingParallax2 } from "@/components/building-parallax-2";
 import { CursorTracker } from "@/components/cursor-tracker";
 import { HomeBlogSection } from "@/components/home-blog-section";
 import { MatrixSection } from "@/components/matrix-section";
@@ -120,7 +120,7 @@ export default async function HomePage() {
       {/* ══════════════════════════════════════════
           BUILDING LIFELINES — GSAP parallax
       ══════════════════════════════════════════ */}
-      <BuildingParallax />
+      <BuildingParallax2 />
 
       {/* ══════════════════════════════════════════
           MEPF EXPLODED VIEW — scroll-triggered 3D
