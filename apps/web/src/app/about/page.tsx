@@ -6,9 +6,9 @@ import type {
 } from "schema-dts";
 
 import { IntroBlock } from "@/components/blocks/intro-block";
-import { LinkList } from "@/components/blocks/link-list";
 import { PageCta } from "@/components/blocks/page-cta";
 import { PageHero } from "@/components/blocks/page-hero";
+import { ServiceNavList } from "@/components/blocks/service-nav-list";
 import { StatsStrip } from "@/components/blocks/stats-strip";
 import { JsonLdScript } from "@/components/json-ld";
 import { ALL_PROJECTS, SCOPE_OF_SERVICES } from "@/data/pkm-portfolio";
@@ -71,14 +71,15 @@ const STATS = [
 // Indexes point into SCOPE_OF_SERVICES; each links to its /services/[slug] page.
 const DISCIPLINE_ORDER = [1, 2, 4, 3, 0];
 
-const DISCIPLINE_LINKS = DISCIPLINE_ORDER.flatMap((i) => {
+const DISCIPLINES = DISCIPLINE_ORDER.flatMap((i, position) => {
   const service = SCOPE_OF_SERVICES[i];
   if (!service) return [];
   return [
     {
+      number: String(position + 1).padStart(2, "0"),
       title: service.discipline,
-      caption: service.shortTitle,
       href: `/services/${service.slug}`,
+      icon: service.slug,
     },
   ];
 });
@@ -141,10 +142,10 @@ export default function AboutPage() {
       <StatsStrip items={STATS} />
 
       {/* 4. What we do — internal links into /services/[slug] */}
-      <LinkList
-        items={DISCIPLINE_LINKS}
+      <ServiceNavList
+        items={DISCIPLINES}
         label="Disciplines"
-        title="MEPF engineering services we provide"
+        title={["MEPF engineering", "services we provide"]}
       />
 
       {/* 5. How we work — full method lives on /how-we-work */}
